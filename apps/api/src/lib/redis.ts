@@ -38,6 +38,13 @@ export function getBullMQRedis(): Redis {
   return new Redis(env.REDIS_URL, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
+    lazyConnect: true,
+    retryStrategy(times) {
+      // Exponential backoff capped at 30s, max 10 retries then stop
+      if (times > 10) return null; // Stop retrying after 10 attempts
+      const delay = Math.min(times * 3000, 30_000);
+      return delay;
+    },
   });
 }
 

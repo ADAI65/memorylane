@@ -5,7 +5,7 @@ import { env } from './env.js';
 import { createRestorationWorker, closeWorker } from './workers/restoration.js';
 import { createPremiumWorker, closePremiumWorker } from './workers/premium.js';
 import { closeAllQueues } from './lib/queue.js';
-import { closeRedis } from './lib/redis.js';
+import { closeRedis, getRedis } from './lib/redis.js';
 import { initializeProviders } from './services/ai/index.js';
 
 const app = createApp();
@@ -13,14 +13,19 @@ const app = createApp();
 // ── Start Worker ─────────────────────────────────────────
 async function startWorker() {
   try {
+    // Test Redis connectivity before starting workers
+    const redis = getRedis();
+    await redis.connect();
+    console.log('[Worker] Redis connected successfully');
+
     await initializeProviders();
     createRestorationWorker();
     createPremiumWorker();
     console.log('[Worker] Both workers initialized (restoration + premium)');
   } catch (err) {
-    console.error('[Worker] Failed to initialize worker:', err);
-    // Don't crash the server if worker fails to start
-    // Worker can be started later when Redis/AI services become available
+    console.warn('[Worker] Redis unavailable — workers disabled. API server is running without job processing.');
+    console.warn('[Worker] Add a Redis service to enable background job processing.');
+    // Don't crash the server — the API still works, just no background jobs
   }
 }
 

@@ -450,6 +450,10 @@ export function createPremiumWorker(): Worker<PremiumJobData> {
   });
 
   worker.on('error', (err) => {
+    // Suppress repeated Redis connection errors to avoid log spam
+    if (err.message.includes('ECONNREFUSED') || err.message.includes('connect') || err.message.includes('ENOTFOUND')) {
+      return; // Redis is down — already warned in index.ts
+    }
     console.error('[PremiumWorker] Worker error:', err.message);
   });
 
