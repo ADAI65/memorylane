@@ -8,8 +8,8 @@ RUN npm install -g pnpm@9
 
 WORKDIR /app
 
-# Copy workspace config from repo root
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+# Copy workspace config and root tsconfig
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
 
 # Copy package.json for shared and api
 COPY packages/shared/package.json packages/shared/
