@@ -1,5 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClientOptions } from '@supabase/supabase-js';
 import { env } from '../env.js';
+import ws from 'ws';
+
+const options: SupabaseClientOptions<'generic'> = {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+  realtime: {
+    // @ts-ignore – Supabase types expect WebSocket, ws package provides it
+    ws: ws,
+  },
+};
 
 /**
  * Supabase admin client (bypasses RLS, uses service role key)
@@ -8,12 +20,7 @@ import { env } from '../env.js';
 export const supabaseAdmin = createClient(
   env.NEXT_PUBLIC_SUPABASE_URL,
   env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  },
+  options,
 );
 
 /**
