@@ -1,0 +1,16 @@
+{
+  "name": "@memorylane/database",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:seed": "supabase db reset --seed",
+    "db:generate": "supabase migration generate",
+    "db:status": "supabase migration list",
+    "clean": "echo 'clean database'"
+  },
+  "devDependencies": {
+    "supabase": "^1.200.0"
+  }
+}

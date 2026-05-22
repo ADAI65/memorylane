@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #1a1a2e;
+    --muted: #f0f0f5;
+    --muted-foreground: #6b7280;
+    --border: #e5e7eb;
+    --ring: #e94560;
+  }
+
+  * {
+    @apply border-gray-200;
+  }
+
+  body {
+    @apply bg-white text-primary-800 antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  /* Gradient backgrounds */
+  .bg-gradient-primary {
+    @apply bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700;
+  }
+
+  .bg-gradient-accent {
+    @apply bg-gradient-to-r from-accent to-accent-dark;
+  }
+
+  .bg-gradient-gold {
+    @apply bg-gradient-to-r from-gold to-gold-light;
+  }
+
+  .bg-gradient-hero {
+    background: linear-gradient(
+      135deg,
+      #0f0f1e 0%,
+      #1a1a2e 30%,
+      #25254a 60%,
+      #1a1a2e 100%
+    );
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-black/20 backdrop-blur-md border border-white/10;
+  }
+
+  /* Card styles */
+  .card-elevated {
+    @apply bg-white rounded-2xl shadow-lg border border-gray-100;
+  }
+
+  .card-glass {
+    @apply bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10;
+  }
+
+  /* Text gradients */
+  .text-gradient-accent {
+    @apply bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent;
+  }
+
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-accent hover:bg-accent-dark text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200
+           shadow-lg shadow-accent/25 hover:shadow-accent/40
+           active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply bg-primary-800 hover:bg-primary-700 text-white font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200
+           shadow-lg shadow-primary-900/25
+           active:scale-[0.98];
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary-800 text-primary-800 hover:bg-primary-800
+           hover:text-white font-semibold px-6 py-3 rounded-xl
+           transition-all duration-200 active:scale-[0.98];
+  }
+
+  .btn-gold {
+    @apply bg-gold hover:bg-gold-dark text-primary-900 font-semibold
+           px-6 py-3 rounded-xl transition-all duration-200
+           shadow-lg shadow-gold/25 hover:shadow-gold/40
+           active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply text-gray-600 hover:text-primary-800 hover:bg-gray-100
+           font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200
+           bg-white text-primary-800 placeholder-gray-400
+           focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent
+           transition-all duration-200;
+  }
+
+  /* Section spacing */
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-y {
+    @apply py-16 md:py-24;
+  }
+
+  /* Container */
+  .container-narrow {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Perspective for 3D transforms */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .rotate-y-\[-5deg\] {
+    transform: rotateY(-5deg);
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@layer utilities {
+  .animate-bounce-slow {
+    animation: bounce-slow 4s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 8s ease-in-out infinite;
+  }
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+
+  /* Scrollbar styling */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}

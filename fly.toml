@@ -1,0 +1,32 @@
+# fly.toml — Deploy API + BullMQ Worker to Fly.io
+# Usage: fly launch --config fly.toml
+
+app = "memorylane-api"
+
+[build]
+  dockerfile = "apps/api/Dockerfile"
+
+[env]
+  PORT = "3001"
+  NODE_ENV = "production"
+
+[[services]]
+  internal_port = 3001
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 100
+    soft_limit = 50
+
+[deploy]
+  strategy = "rolling"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512

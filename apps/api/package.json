@@ -1,0 +1,36 @@
+{
+  "name": "@memorylane/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'lint api'",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.0",
+    "@hono/zod-validator": "^0.4.1",
+    "@memorylane/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.45.0",
+    "bullmq": "^5.30.0",
+    "dotenv": "^16.4.0",
+    "hono": "^4.6.0",
+    "ioredis": "^5.4.0",
+    "nanoid": "^5.0.0",
+    "node-fetch": "^3.3.2",
+    "pdfkit": "^0.18.0",
+    "socks-proxy-agent": "^10.0.0",
+    "stripe": "^17.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/pdfkit": "^0.17.6",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}
