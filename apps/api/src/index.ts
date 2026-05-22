@@ -1,12 +1,12 @@
 import 'dotenv/config';
 import { serve } from '@hono/node-server';
-import { createApp } from './app';
-import { env } from './env';
-import { createRestorationWorker, closeWorker } from './workers/restoration';
-import { createPremiumWorker, closePremiumWorker } from './workers/premium';
-import { closeAllQueues } from './lib/queue';
-import { closeRedis } from './lib/redis';
-import { initializeProviders } from './services/ai';
+import { createApp } from './app.js';
+import { env } from './env.js';
+import { createRestorationWorker, closeWorker } from './workers/restoration.js';
+import { createPremiumWorker, closePremiumWorker } from './workers/premium.js';
+import { closeAllQueues } from './lib/queue.js';
+import { closeRedis } from './lib/redis.js';
+import { initializeProviders } from './services/ai.js';
 
 const app = createApp();
 

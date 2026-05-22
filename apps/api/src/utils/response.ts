@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { AppError } from './errors';
+import { AppError } from './errors.js';
 
 type SuccessResponse<T> = {
   success: true;

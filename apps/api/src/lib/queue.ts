@@ -1,7 +1,7 @@
 // @memorylane/api - BullMQ Queue definitions and helpers
 import { Queue } from 'bullmq';
-import { getBullMQRedis } from './redis';
-import { supabaseAdmin } from '../db/supabase';
+import { getBullMQRedis } from './redis.js';
+import { supabaseAdmin } from '../db/supabase.js';
 import { JOB_RETRY_CONFIG } from '@memorylane/shared';
 
 // ── Queue Names ──────────────────────────────────────────

@@ -4,20 +4,20 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { secureHeaders } from 'hono/secure-headers';
 
-import { env } from './env';
-import { errorHandler } from './utils/response';
-import { authMiddleware, adminOnlyMiddleware } from './middleware/auth';
-import { rateLimitMiddleware } from './middleware/rate-limit';
+import { env } from './env.js';
+import { errorHandler } from './utils/response.js';
+import { authMiddleware, adminOnlyMiddleware } from './middleware/auth.js';
+import { rateLimitMiddleware } from './middleware/rate-limit.js';
 
 // Route imports
-import authRoutes from './routes/auth';
-import uploadRoutes from './routes/uploads';
-import jobRoutes from './routes/jobs';
-import serviceRoutes from './routes/services';
-import paymentRoutes from './routes/payments';
-import userRoutes from './routes/users';
-import adminRoutes from './routes/admin';
-import stripeWebhook from './routes/webhooks/stripe';
+import authRoutes from './routes/auth.js';
+import uploadRoutes from './routes/uploads.js';
+import jobRoutes from './routes/jobs.js';
+import serviceRoutes from './routes/services.js';
+import paymentRoutes from './routes/payments.js';
+import userRoutes from './routes/users.js';
+import adminRoutes from './routes/admin.js';
+import stripeWebhook from './routes/webhooks/stripe.js';
 
 /**
  * App factory for testability
