@@ -2,35 +2,44 @@ import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { createApp } from './app.js';
 import { env } from './env.js';
-import { createRestorationWorker, closeWorker } from './workers/restoration.js';
-import { createPremiumWorker, closePremiumWorker } from './workers/premium.js';
 import { closeAllQueues } from './lib/queue.js';
 import { closeRedis, getRedis } from './lib/redis.js';
 import { initializeProviders } from './services/ai/index.js';
 
 const app = createApp();
 
-// ── Start Worker ─────────────────────────────────────────
+// Track worker references for graceful shutdown
+let closeRestorationWorker: (() => Promise<void>) | null = null;
+let closePremiumWorker: (() => Promise<void>) | null = null;
+
+// ── Start Worker (dynamic import — only if Redis is reachable) ──
 async function startWorker() {
   try {
-    // Test Redis connectivity before starting workers
+    // 1. Test Redis connectivity first
     const redis = getRedis();
     await redis.connect();
     console.log('[Worker] Redis connected successfully');
 
+    // 2. Initialize AI providers
     await initializeProviders();
 
-    // Create workers with autorun: false, then explicitly run
+    // 3. Dynamically import and start workers ONLY after Redis is confirmed
+    const { createRestorationWorker } = await import('./workers/restoration.js');
+    const { createPremiumWorker } = await import('./workers/premium.js');
+
     const restorationWorker = createRestorationWorker();
     const premiumWorker = createPremiumWorker();
     await restorationWorker.run();
     await premiumWorker.run();
 
+    // Save close functions for shutdown
+    closeRestorationWorker = () => restorationWorker.close();
+    closePremiumWorker = () => premiumWorker.close();
+
     console.log('[Worker] Both workers running (restoration + premium)');
   } catch (err) {
     console.warn('[Worker] Redis unavailable — workers disabled. API server is running without job processing.');
     console.warn('[Worker] Add a Redis service to enable background job processing.');
-    // Don't crash the server — the API still works, just no background jobs
   }
 }
 
@@ -39,8 +48,8 @@ async function gracefulShutdown(signal: string) {
   console.log(`\n[Server] ${signal} received, shutting down gracefully...`);
 
   try {
-    await closeWorker();
-    await closePremiumWorker();
+    if (closeRestorationWorker) await closeRestorationWorker();
+    if (closePremiumWorker) await closePremiumWorker();
     await closeAllQueues();
     await closeRedis();
     console.log('[Server] All connections closed');
