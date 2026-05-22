@@ -1,4 +1,4 @@
-import { ALLOWED_EXTENSIONS, ALLOWED_FILE_TYPES } from '../constants/limits';
+import { ALLOWED_EXTENSIONS, ALLOWED_FILE_TYPES } from '../constants/limits.js';
 
 /**
  * Validate file MIME type

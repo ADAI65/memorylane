@@ -1,4 +1,4 @@
-import type { ServiceType, JobStatus, AnimationType } from './enums';
+import type { ServiceType, JobStatus, AnimationType } from './enums.js';
 
 export interface RestorationJob {
   id: string;

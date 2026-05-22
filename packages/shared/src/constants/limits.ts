@@ -1,5 +1,5 @@
-import { UserPlan } from '../types/enums';
-export { UserPlan } from '../types/enums';
+import { UserPlan } from '../types/enums.js';
+export { UserPlan } from '../types/enums.js';
 
 // Rate limits per plan
 export const RATE_LIMITS = {

@@ -1,4 +1,4 @@
-import type { ServiceType, PaymentStatus, PaymentType } from './enums';
+import type { ServiceType, PaymentStatus, PaymentType } from './enums.js';
 
 export interface Payment {
   id: string;

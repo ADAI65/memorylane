@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ServiceType } from '../types/enums';
+import { ServiceType } from '../types/enums.js';
 
 export const createCheckoutSchema = z.object({
   service_type: z.nativeEnum(ServiceType).optional(),

@@ -1,4 +1,4 @@
-import { ServiceType } from '../types/enums';
+import { ServiceType } from '../types/enums.js';
 
 // AI model identifiers
 export const AI_MODELS = {

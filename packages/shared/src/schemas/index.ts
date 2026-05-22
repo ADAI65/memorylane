@@ -1,4 +1,4 @@
-export { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, refreshTokenSchema } from './auth';
-export { uploadFileSchema, uploadListQuerySchema } from './upload';
-export { createJobSchema, jobListQuerySchema } from './job';
-export { createCheckoutSchema, paymentListQuerySchema } from './payment';
+export { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, refreshTokenSchema } from './auth.js';
+export { uploadFileSchema, uploadListQuerySchema } from './upload.js';
+export { createJobSchema, jobListQuerySchema } from './job.js';
+export { createCheckoutSchema, paymentListQuerySchema } from './payment.js';

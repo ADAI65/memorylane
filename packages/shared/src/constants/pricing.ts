@@ -1,4 +1,4 @@
-import { ServiceType } from '../types/enums';
+import { ServiceType } from '../types/enums.js';
 
 // Service pricing in cents (USD)
 export const SERVICE_PRICES: Record<ServiceType, { priceCents: number; displayName: string; description: string }> = {

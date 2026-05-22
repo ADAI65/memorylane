@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ServiceType, AnimationType } from '../types/enums';
+import { ServiceType, AnimationType } from '../types/enums.js';
 
 export const createJobSchema = z.object({
   upload_id: z.string().uuid('Invalid upload ID'),

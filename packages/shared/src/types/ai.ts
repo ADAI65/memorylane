@@ -1,4 +1,4 @@
-import type { ServiceType, AIPredictionStatus } from './enums';
+import type { ServiceType, AIPredictionStatus } from './enums.js';
 
 export interface AIProvider {
   readonly name: string;

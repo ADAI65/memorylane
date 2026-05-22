@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ALLOWED_FILE_TYPES, RATE_LIMITS } from '../constants/limits';
+import { ALLOWED_FILE_TYPES, RATE_LIMITS } from '../constants/limits.js';
 
 export const uploadFileSchema = z.object({
   file_name: z.string().min(1).max(255),
