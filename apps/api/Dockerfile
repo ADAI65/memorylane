@@ -1,7 +1,7 @@
 # ─── Build stage ───────────────────────────────────────────
 FROM node:20-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN npm install -g pnpm@9
 
 WORKDIR /app
 
@@ -24,7 +24,7 @@ RUN pnpm --filter @memorylane/api build
 # ─── Production stage ──────────────────────────────────────
 FROM node:20-alpine AS runner
 
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN npm install -g pnpm@9
 
 WORKDIR /app
 
