@@ -16,9 +16,9 @@ const envSchema = z.object({
   // Redis
   REDIS_URL: z.string().default('redis://localhost:6379'),
 
-  // Stripe
-  STRIPE_SECRET_KEY: z.string().min(1),
-  STRIPE_WEBHOOK_SECRET: z.string().min(1),
+  // Stripe (暂时可选，未接入支付)
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_PRO_MONTHLY_PRICE_ID: z.string().optional(),
   STRIPE_UNLIMITED_YEARLY_PRICE_ID: z.string().optional(),
 
