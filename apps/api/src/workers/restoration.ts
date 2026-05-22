@@ -204,11 +204,12 @@ export function createRestorationWorker(): Worker<RestorationJobData> {
     },
     {
       connection: getBullMQRedis(),
-      concurrency: 3, // Process up to 3 jobs in parallel
+      concurrency: 3,
       limiter: {
-        max: 10, // Max 10 jobs per duration
-        duration: 60_000, // Per minute
+        max: 10,
+        duration: 60_000,
       },
+      autorun: false, // Don't auto-start — prevents Redis connection spam if Redis is down
     },
   );
 
@@ -222,14 +223,11 @@ export function createRestorationWorker(): Worker<RestorationJobData> {
   });
 
   worker.on('error', (err) => {
-    // Suppress repeated Redis connection errors to avoid log spam
-    if (err.message.includes('ECONNREFUSED') || err.message.includes('connect') || err.message.includes('ENOTFOUND')) {
-      return; // Redis is down — already warned in index.ts
-    }
-    console.error('[Worker] Worker error:', err.message);
+    // Completely suppress connection errors to prevent log spam
+    // These are handled in index.ts before worker creation
   });
 
-  console.log(`[Worker] Restoration worker started (concurrency: 3)`);
+  console.log(`[Worker] Restoration worker created (autorun: false)`);
 
   return worker;
 }

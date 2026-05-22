@@ -19,9 +19,14 @@ async function startWorker() {
     console.log('[Worker] Redis connected successfully');
 
     await initializeProviders();
-    createRestorationWorker();
-    createPremiumWorker();
-    console.log('[Worker] Both workers initialized (restoration + premium)');
+
+    // Create workers with autorun: false, then explicitly run
+    const restorationWorker = createRestorationWorker();
+    const premiumWorker = createPremiumWorker();
+    await restorationWorker.run();
+    await premiumWorker.run();
+
+    console.log('[Worker] Both workers running (restoration + premium)');
   } catch (err) {
     console.warn('[Worker] Redis unavailable — workers disabled. API server is running without job processing.');
     console.warn('[Worker] Add a Redis service to enable background job processing.');

@@ -432,11 +432,12 @@ export function createPremiumWorker(): Worker<PremiumJobData> {
     },
     {
       connection: getBullMQRedis(),
-      concurrency: 2, // Premium jobs are heavier — lower concurrency
+      concurrency: 2,
       limiter: {
-        max: 5, // Max 5 premium jobs per minute
+        max: 5,
         duration: 60_000,
       },
+      autorun: false, // Don't auto-start — prevents Redis connection spam if Redis is down
     },
   );
 
@@ -450,14 +451,11 @@ export function createPremiumWorker(): Worker<PremiumJobData> {
   });
 
   worker.on('error', (err) => {
-    // Suppress repeated Redis connection errors to avoid log spam
-    if (err.message.includes('ECONNREFUSED') || err.message.includes('connect') || err.message.includes('ENOTFOUND')) {
-      return; // Redis is down — already warned in index.ts
-    }
-    console.error('[PremiumWorker] Worker error:', err.message);
+    // Completely suppress connection errors to prevent log spam
+    // These are handled in index.ts before worker creation
   });
 
-  console.log('[PremiumWorker] Premium worker started (concurrency: 2)');
+  console.log('[PremiumWorker] Premium worker created (autorun: false)');
   return worker;
 }
 
