@@ -1,6 +1,6 @@
 // @memorylane/api - Redis connection via ioredis
 import Redis from 'ioredis';
-import { env } from '../env';
+import { env } from '../env.js';
 
 let _redis: Redis | null = null;
 

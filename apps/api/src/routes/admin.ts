@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { supabaseAdmin } from '../db/supabase';
-import { success, paginated } from '../utils/response';
+import { supabaseAdmin } from '../db/supabase.js';
+import { success, paginated } from '../utils/response.js';
 
 const admin = new Hono();
 

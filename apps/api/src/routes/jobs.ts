@@ -10,10 +10,10 @@ import {
   PREMIUM_DAILY_LIMIT,
   HIGH_COST_PREMIUM_SERVICES,
 } from '@memorylane/shared';
-import { supabaseAdmin } from '../db/supabase';
-import { success, paginated } from '../utils/response';
-import { NotFoundError, ValidationError } from '../utils/errors';
-import { getRestorationQueue, getPremiumQueue, type RestorationJobData, type PremiumJobData } from '../lib/queue';
+import { supabaseAdmin } from '../db/supabase.js';
+import { success, paginated } from '../utils/response.js';
+import { NotFoundError, ValidationError } from '../utils/errors.js';
+import { getRestorationQueue, getPremiumQueue, type RestorationJobData, type PremiumJobData } from '../lib/queue.js';
 
 const jobs = new Hono();
 

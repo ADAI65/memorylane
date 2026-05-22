@@ -2,11 +2,11 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { createCheckoutSchema, paymentListQuerySchema, SERVICE_PRICES, ServiceType } from '@memorylane/shared';
-import { supabaseAdmin } from '../db/supabase';
-import { success, paginated } from '../utils/response';
-import { ValidationError, NotFoundError } from '../utils/errors';
-import { getStripe, getProPriceId, getUnlimitedPriceId } from '../lib/stripe';
-import { env } from '../env';
+import { supabaseAdmin } from '../db/supabase.js';
+import { success, paginated } from '../utils/response.js';
+import { ValidationError, NotFoundError } from '../utils/errors.js';
+import { getStripe, getProPriceId, getUnlimitedPriceId } from '../lib/stripe.js';
+import { env } from '../env.js';
 
 const payments = new Hono();
 

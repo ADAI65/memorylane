@@ -1,6 +1,6 @@
 // @memorylane/api - Stripe client wrapper
 import Stripe from 'stripe';
-import { env } from '../env';
+import { env } from '../env.js';
 
 let _stripe: Stripe | null = null;
 

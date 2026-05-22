@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { uploadListQuerySchema } from '@memorylane/shared';
-import { supabaseAdmin } from '../db/supabase';
-import { success, paginated } from '../utils/response';
-import { NotFoundError, ValidationError } from '../utils/errors';
+import { supabaseAdmin } from '../db/supabase.js';
+import { success, paginated } from '../utils/response.js';
+import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateUploadPath, sanitizeFilename } from '@memorylane/shared';
-import { getRestorationQueue } from '../lib/queue';
+import { getRestorationQueue } from '../lib/queue.js';
 
 const uploads = new Hono();
 

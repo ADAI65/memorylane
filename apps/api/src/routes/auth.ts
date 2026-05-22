@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../env';
+import { env } from '../env.js';
 import { registerSchema, loginSchema } from '@memorylane/shared';
-import { success } from '../utils/response';
-import { ValidationError } from '../utils/errors';
+import { success } from '../utils/response.js';
+import { ValidationError } from '../utils/errors.js';
 
 const auth = new Hono();
 

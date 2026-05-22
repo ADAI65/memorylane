@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../env';
+import { env } from '../env.js';
 
 /**
  * Supabase admin client (bypasses RLS, uses service role key)

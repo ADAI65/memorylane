@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { SERVICE_PRICES, ServiceType } from '@memorylane/shared';
-import { success } from '../utils/response';
-import { ValidationError } from '../utils/errors';
-import { supabaseAdmin } from '../db/supabase';
+import { success } from '../utils/response.js';
+import { ValidationError } from '../utils/errors.js';
+import { supabaseAdmin } from '../db/supabase.js';
 
 const services = new Hono();
 

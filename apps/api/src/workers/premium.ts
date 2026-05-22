@@ -1,20 +1,20 @@
 // @memorylane/api - Premium Service Worker
 // Processes BullMQ jobs for all premium services (animation, video, dating, colorization, face match, certificate)
 import { Worker, Job } from 'bullmq';
-import { getBullMQRedis } from '../lib/redis';
+import { getBullMQRedis } from '../lib/redis.js';
 import {
   QUEUE_NAMES,
   addJobEvent,
   updateJobStatus,
   getUploadPath,
   getPublicUrl,
-} from '../lib/queue';
-import type { PremiumJobData } from '../lib/queue';
+} from '../lib/queue.js';
+import type { PremiumJobData } from '../lib/queue.js';
 import {
   initializeProviders,
   createPrediction,
   waitForPrediction,
-} from '../services/ai';
+} from '../services/ai/index.js';
 import { ServiceType, DEFAULT_MODEL_PER_SERVICE, ESTIMATED_DURATIONS } from '@memorylane/shared';
 
 // ── Worker Processor ─────────────────────────────────────
@@ -259,7 +259,7 @@ async function downloadAndUploadResult(
   ext: string,
   contentType: string,
 ): Promise<string> {
-  const { supabaseAdmin } = await import('../db/supabase');
+  const { supabaseAdmin } = await import('../db/supabase.js');
   const provider = getProviderFromUrl(url);
 
   try {
@@ -305,7 +305,7 @@ async function uploadPdfResult(
   userId: string,
   pdfBytes: Uint8Array,
 ): Promise<string> {
-  const { supabaseAdmin } = await import('../db/supabase');
+  const { supabaseAdmin } = await import('../db/supabase.js');
 
   const storagePath = `results/${userId}/${jobId}/certificate.pdf`;
 
@@ -332,7 +332,7 @@ async function uploadJsonResult(
   jsonResult: Record<string, unknown>,
   serviceType: ServiceType,
 ): Promise<string> {
-  const { supabaseAdmin } = await import('../db/supabase');
+  const { supabaseAdmin } = await import('../db/supabase.js');
 
   const storagePath = `results/${userId}/${jobId}/${serviceType}-result.json`;
   const jsonStr = JSON.stringify(jsonResult, null, 2);
@@ -360,7 +360,7 @@ async function uploadTextResult(
   textResult: string,
   serviceType: ServiceType,
 ): Promise<string> {
-  const { supabaseAdmin } = await import('../db/supabase');
+  const { supabaseAdmin } = await import('../db/supabase.js');
 
   const storagePath = `results/${userId}/${jobId}/${serviceType}-result.txt`;
 

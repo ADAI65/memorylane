@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
-import { supabaseAdmin } from '../db/supabase';
-import { success } from '../utils/response';
-import { ValidationError } from '../utils/errors';
+import { supabaseAdmin } from '../db/supabase.js';
+import { success } from '../utils/response.js';
+import { ValidationError } from '../utils/errors.js';
 
 const users = new Hono();
 

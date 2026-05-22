@@ -1,7 +1,7 @@
 import { createMiddleware } from 'hono/factory';
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../env';
-import { UnauthorizedError } from '../utils/errors';
+import { env } from '../env.js';
+import { UnauthorizedError } from '../utils/errors.js';
 import type { Profile } from '@memorylane/shared';
 
 /**

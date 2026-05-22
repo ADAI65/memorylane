@@ -6,7 +6,7 @@ import { createRestorationWorker, closeWorker } from './workers/restoration.js';
 import { createPremiumWorker, closePremiumWorker } from './workers/premium.js';
 import { closeAllQueues } from './lib/queue.js';
 import { closeRedis } from './lib/redis.js';
-import { initializeProviders } from './services/ai.js';
+import { initializeProviders } from './services/ai/index.js';
 
 const app = createApp();
 

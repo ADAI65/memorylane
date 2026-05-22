@@ -1,9 +1,9 @@
 // @memorylane/api - Stripe Webhook handler
 import { Hono } from 'hono';
-import { getStripe } from '../../lib/stripe';
-import { supabaseAdmin } from '../../db/supabase';
-import { env } from '../../env';
-import { getPremiumQueue, updateJobStatus, addJobEvent } from '../../lib/queue';
+import { getStripe } from '../../lib/stripe.js';
+import { supabaseAdmin } from '../../db/supabase.js';
+import { env } from '../../env.js';
+import { getPremiumQueue, updateJobStatus, addJobEvent } from '../../lib/queue.js';
 import { DEFAULT_MODEL_PER_SERVICE } from '@memorylane/shared';
 import { ServiceType } from '@memorylane/shared';
 import Stripe from 'stripe';

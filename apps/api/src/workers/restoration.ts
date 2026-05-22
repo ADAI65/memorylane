@@ -1,20 +1,20 @@
 // @memorylane/api - Restoration Worker
 // Processes BullMQ jobs for photo restoration via AI providers
 import { Worker, Job } from 'bullmq';
-import { getBullMQRedis } from '../lib/redis';
+import { getBullMQRedis } from '../lib/redis.js';
 import {
   QUEUE_NAMES,
   addJobEvent,
   updateJobStatus,
   getUploadPath,
   getPublicUrl,
-} from '../lib/queue';
-import type { RestorationJobData } from '../lib/queue';
+} from '../lib/queue.js';
+import type { RestorationJobData } from '../lib/queue.js';
 import {
   initializeProviders,
   createPrediction,
   waitForPrediction,
-} from '../services/ai';
+} from '../services/ai/index.js';
 import { ServiceType, DEFAULT_MODEL_PER_SERVICE } from '@memorylane/shared';
 
 // ── Worker Processor ─────────────────────────────────────
@@ -159,7 +159,7 @@ async function uploadResultToStorage(
   serviceType: string,
 ): Promise<string> {
   // Import supabase admin dynamically to avoid circular deps
-  const { supabaseAdmin } = await import('../db/supabase');
+  const { supabaseAdmin } = await import('../db/supabase.js');
 
   // Download the result image
   const response = await fetch(resultUrl);

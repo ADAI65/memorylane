@@ -1,7 +1,7 @@
 // @memorylane/api - AI Service abstraction layer
 import type { AIProvider, AIRequest, AIPrediction, AIResult } from '@memorylane/shared';
 import { ServiceType } from '@memorylane/shared';
-import { env } from '../../env';
+import { env } from '../../env.js';
 
 // ── Provider Registry ────────────────────────────────────
 
@@ -111,7 +111,7 @@ export async function initializeProviders(): Promise<void> {
 
   // Replicate provider (used for: basic_restoration, era_colorization, super_resolution)
   if (env.REPLICATE_API_TOKEN) {
-    const { ReplicateProvider } = await import('./providers/replicate');
+    const { ReplicateProvider } = await import('./providers/replicate.js');
     const replicate = new ReplicateProvider(env.REPLICATE_API_TOKEN);
     registerProvider(replicate);
     console.log('[AI] Replicate provider registered');
@@ -121,7 +121,7 @@ export async function initializeProviders(): Promise<void> {
 
   // OpenAI provider (used for: historical_dating)
   if (env.OPENAI_API_KEY) {
-    const { OpenAIProvider } = await import('./providers/openai');
+    const { OpenAIProvider } = await import('./providers/openai.js');
     const openai = new OpenAIProvider(env.OPENAI_API_KEY);
     registerProvider(openai);
     console.log('[AI] OpenAI provider registered');
@@ -131,7 +131,7 @@ export async function initializeProviders(): Promise<void> {
 
   // HeyGen provider (used for: photo_animation)
   if (env.HEYGEN_API_KEY) {
-    const { HeyGenProvider } = await import('./providers/heygen');
+    const { HeyGenProvider } = await import('./providers/heygen.js');
     const heygen = new HeyGenProvider(env.HEYGEN_API_KEY);
     registerProvider(heygen);
     console.log('[AI] HeyGen provider registered');
@@ -141,7 +141,7 @@ export async function initializeProviders(): Promise<void> {
 
   // Runway provider (used for: memory_video)
   if (env.RUNWAY_API_KEY) {
-    const { RunwayProvider } = await import('./providers/runway');
+    const { RunwayProvider } = await import('./providers/runway.js');
     const runway = new RunwayProvider(env.RUNWAY_API_KEY, env.ELEVENLABS_API_KEY);
     registerProvider(runway);
     console.log('[AI] Runway provider registered');
@@ -151,7 +151,7 @@ export async function initializeProviders(): Promise<void> {
 
   // InsightFace provider (used for: face_match)
   if (env.INSIGHTFACE_API_URL) {
-    const { InsightFaceProvider } = await import('./providers/insightface');
+    const { InsightFaceProvider } = await import('./providers/insightface.js');
     const insightface = new InsightFaceProvider(env.INSIGHTFACE_API_URL, env.INSIGHTFACE_API_KEY);
     registerProvider(insightface);
     console.log('[AI] InsightFace provider registered');
@@ -161,7 +161,7 @@ export async function initializeProviders(): Promise<void> {
 
   // Certificate provider (used for: certificate) — always available (local PDF generation)
   {
-    const { CertificateProvider } = await import('./providers/certificate');
+    const { CertificateProvider } = await import('./providers/certificate.js');
     const certificate = new CertificateProvider();
     registerProvider(certificate);
     console.log('[AI] Certificate provider registered (local)');

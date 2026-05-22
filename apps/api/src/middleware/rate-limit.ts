@@ -1,6 +1,6 @@
 import { createMiddleware } from 'hono/factory';
-import { supabaseAdmin } from '../db/supabase';
-import { DailyLimitError } from '../utils/errors';
+import { supabaseAdmin } from '../db/supabase.js';
+import { DailyLimitError } from '../utils/errors.js';
 import { RATE_LIMITS } from '@memorylane/shared';
 
 /**
