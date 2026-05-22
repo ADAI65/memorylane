@@ -8,8 +8,8 @@ const options: SupabaseClientOptions<'generic'> = {
     persistSession: false,
   },
   realtime: {
-    // @ts-ignore – Supabase types expect WebSocket, ws package provides it
-    ws: ws,
+    // @ts-ignore – Supabase expects a WebSocket constructor
+    transport: ws,
   },
 };
 
