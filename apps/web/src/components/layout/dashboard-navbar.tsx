@@ -1,8 +1,6 @@
 "use client";
 
-// @memorylane/web - Component: Public Navbar
-'use client';
-
+// @memorylane/web - Component: Dashboard Navbar (Chinese, admin-only)
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -13,14 +11,14 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-export function Navbar() {
+export function DashboardNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAuthenticated } = useAuth();
 
   const navLinks = [
-    { href: '/pricing', label: 'Pricing' },
-    { href: '/#services', label: 'Services' },
-    { href: '/#how-it-works', label: 'How It Works' },
+    { href: '/pricing', label: '定价' },
+    { href: '/#services', label: 'AI 服务' },
+    { href: '/#how-it-works', label: '使用流程' },
   ];
 
   return (
@@ -52,19 +50,12 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button size="sm">Dashboard</Button>
+                <Button size="sm">控制台</Button>
               </Link>
             ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button size="sm">Get Started</Button>
-                </Link>
-              </>
+              <Link href="/login">
+                <Button variant="ghost" size="sm">登录</Button>
+              </Link>
             )}
           </div>
 
@@ -95,23 +86,12 @@ export function Navbar() {
             <div className="pt-3 border-t border-gray-100 space-y-2">
               {isAuthenticated ? (
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full" size="sm">
-                    Dashboard
-                  </Button>
+                  <Button className="w-full" size="sm">控制台</Button>
                 </Link>
               ) : (
-                <>
-                  <Link href="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full" size="sm">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full" size="sm">
-                      Get Started
-                    </Button>
-                  </Link>
-                </>
+                <Link href="/login" onClick={() => setMobileOpen(false)}>
+                  <Button variant="outline" className="w-full" size="sm">登录</Button>
+                </Link>
               )}
             </div>
           </div>
