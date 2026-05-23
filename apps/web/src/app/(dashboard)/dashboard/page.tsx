@@ -54,18 +54,18 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-display font-bold text-primary-800">
-            Welcome back, {user?.full_name || 'there'}!
+            欢迎回来，{user?.full_name || '朋友'}！
           </h1>
           <p className="text-gray-500 mt-1">
             {isAdmin
-              ? 'Admin account — all limits bypassed'
-              : 'Free plan — basic restorations unlimited, premium video 1/day'}
+              ? '管理员账号 — 所有限制已解除'
+              : '免费版 — 基础修复无限次，高级视频每天 1 次'}
           </p>
         </div>
         <Link href="/upload">
           <Button>
             <Upload className="w-4 h-4 mr-2" />
-            Upload Photo
+            上传照片
           </Button>
         </Link>
       </div>
@@ -73,9 +73,9 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Restorations', value: jobs.length.toString(), icon: Image, color: 'text-accent', bgColor: 'bg-accent/10' },
-          { label: 'Completed', value: jobs.filter((j: any) => j.status === 'completed').length.toString(), icon: CheckCircle, color: 'text-green-600', bgColor: 'bg-green-50' },
-          { label: 'Failed', value: jobs.filter((j: any) => j.status === 'failed').length.toString(), icon: AlertCircle, color: 'text-red-600', bgColor: 'bg-red-50' },
+          { label: '总修复数', value: jobs.length.toString(), icon: Image, color: 'text-accent', bgColor: 'bg-accent/10' },
+          { label: '已完成', value: jobs.filter((j: any) => j.status === 'completed').length.toString(), icon: CheckCircle, color: 'text-green-600', bgColor: 'bg-green-50' },
+          { label: '失败', value: jobs.filter((j: any) => j.status === 'failed').length.toString(), icon: AlertCircle, color: 'text-red-600', bgColor: 'bg-red-50' },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -107,8 +107,8 @@ export default function DashboardPage() {
                 <Upload className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <CardTitle>Upload New Photo</CardTitle>
-                <CardDescription>Start a new restoration</CardDescription>
+                <CardTitle>上传新照片</CardTitle>
+                <CardDescription>开始新的修复任务</CardDescription>
               </div>
             </div>
           </Card>
@@ -120,8 +120,8 @@ export default function DashboardPage() {
                 <Sparkles className="w-6 h-6 text-gold-dark" />
               </div>
               <div>
-                <CardTitle>Premium Services</CardTitle>
-                <CardDescription>Explore AI animation & more</CardDescription>
+                <CardTitle>高级服务</CardTitle>
+                <CardDescription>探索 AI 动画及更多功能</CardDescription>
               </div>
             </div>
           </Card>
@@ -133,8 +133,8 @@ export default function DashboardPage() {
                 <Image className="w-6 h-6 text-primary-800" />
               </div>
               <div>
-                <CardTitle>View History</CardTitle>
-                <CardDescription>See all past restorations</CardDescription>
+                <CardTitle>查看历史</CardTitle>
+                <CardDescription>查看所有修复记录</CardDescription>
               </div>
             </div>
           </Card>
@@ -145,11 +145,11 @@ export default function DashboardPage() {
       <Card padding="md">
         <CardHeader className="!mb-4 flex items-center justify-between">
           <div>
-            <CardTitle>Recent Restorations</CardTitle>
-            <CardDescription>Your latest AI processing jobs</CardDescription>
+            <CardTitle>最近修复</CardTitle>
+            <CardDescription>您最近的 AI 处理任务</CardDescription>
           </div>
           <Link href="/history">
-            <Button variant="ghost" size="sm">View All</Button>
+            <Button variant="ghost" size="sm">查看全部</Button>
           </Link>
         </CardHeader>
         <CardContent>
@@ -161,9 +161,9 @@ export default function DashboardPage() {
             </div>
           ) : recentJobs.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>No restorations yet.</p>
+              <p>暂无修复记录。</p>
               <Link href="/upload">
-                <Button variant="ghost" size="sm" className="mt-2">Upload your first photo</Button>
+                <Button variant="ghost" size="sm" className="mt-2">上传您的第一张照片</Button>
               </Link>
             </div>
           ) : (
@@ -194,14 +194,16 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <Badge
+                      <Badge
                       variant={
                         job.status === 'completed' ? 'success' :
                         job.status === 'failed' ? 'error' : 'info'
                       }
                       size="sm"
                     >
-                      {job.status}
+                      {job.status === 'completed' ? '已完成' :
+                       job.status === 'failed' ? '失败' :
+                       job.status === 'processing' ? '处理中' : '待处理'}
                     </Badge>
                   </div>
                 </Link>
