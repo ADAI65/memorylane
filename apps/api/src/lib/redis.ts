@@ -14,16 +14,24 @@ export function getRedis(): Redis {
       enableReadyCheck: false,
       lazyConnect: true,
       retryStrategy(times) {
-        const delay = Math.min(times * 200, 5000);
+        // Stop retrying after 5 attempts to prevent log spam
+        if (times > 5) return null;
+        const delay = Math.min(times * 1000, 5000);
         return delay;
       },
     });
 
+    let errorLogged = false;
     _redis.on('error', (err) => {
-      console.error('[Redis] Connection error:', err.message);
+      // Only log the first error to avoid spamming logs
+      if (!errorLogged) {
+        console.error('[Redis] Connection error (further errors suppressed):', err.message);
+        errorLogged = true;
+      }
     });
 
     _redis.on('connect', () => {
+      errorLogged = false; // Reset on successful connect
       console.log('[Redis] Connected');
     });
   }
