@@ -26,24 +26,24 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Upload', href: '/upload', icon: Upload },
+  { name: '仪表盘', href: '/dashboard', icon: LayoutDashboard },
+  { name: '上传照片', href: '/upload', icon: Upload },
   {
-    name: 'Services',
+    name: 'AI 服务',
     href: '/services',
     icon: Sparkles,
     children: [
-      { name: 'Photo Animation', href: '/services/animation' },
-      { name: 'Memory Video', href: '/services/memory-video' },
-      { name: 'Historical Dating', href: '/services/historical-dating' },
-      { name: 'Era Colorization', href: '/services/era-colorization' },
-      { name: 'Face Match', href: '/services/face-match' },
-      { name: 'Certificate', href: '/services/certificate' },
+      { name: '照片动画', href: '/services/animation' },
+      { name: '记忆视频', href: '/services/memory-video' },
+      { name: '历史年代', href: '/services/historical-dating' },
+      { name: '年代上色', href: '/services/era-colorization' },
+      { name: '人脸匹配', href: '/services/face-match' },
+      { name: '档案证书', href: '/services/certificate' },
     ],
   },
-  { name: 'History', href: '/history', icon: History },
-  { name: 'Billing', href: '/billing', icon: CreditCard },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: '历史记录', href: '/history', icon: History },
+  { name: '账单', href: '/billing', icon: CreditCard },
+  { name: '设置', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
@@ -89,7 +89,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Plan badge */}
         <div className="px-4 py-3">
           <Badge variant={plan === 'free' ? 'default' : 'gold'} size="md">
-            {plan === 'free' ? 'Free Plan' : plan === 'pro' ? 'Pro Plan' : 'Unlimited'}
+            {plan === 'free' ? '免费版' : plan === 'pro' ? '专业版' : '无限版'}
           </Badge>
         </div>
 
@@ -155,7 +155,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               )}
             >
               <ShieldCheck className="w-5 h-5 flex-shrink-0" />
-              Admin
+              管理后台
             </Link>
           </div>
         )}
@@ -165,7 +165,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="p-4 border-t border-gray-100">
             <Link href="/pricing">
               <button className="w-full btn-gold text-sm py-2.5">
-                Upgrade to Pro
+                升级专业版
               </button>
             </Link>
           </div>
