@@ -28,7 +28,7 @@ export function createApp() {
   // Global middleware
   app.use('*', secureHeaders());
   app.use('*', cors({
-    origin: [env.NEXT_PUBLIC_APP_URL, 'http://localhost:3000'],
+    origin: [env.NEXT_PUBLIC_APP_URL, 'http://localhost:3000', 'https://memorylane-web.vercel.app'],
     credentials: true,
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
