@@ -1,5 +1,6 @@
 // @memorylane/web - API Client: Base fetch wrapper
 import type { ApiResponse } from '@memorylane/shared';
+import { createClient } from '@/lib/supabase/client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -10,16 +11,23 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
-  private getHeaders(): HeadersInit {
+  private async getHeaders(): Promise<HeadersInit> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    return headers;
-  }
 
-  private async getAuthToken(): Promise<string | null> {
-    // Cookie-based auth - browser sends cookies automatically
-    return null;
+    // Attach Supabase JWT for backend auth
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+    } catch {
+      // No session available — request will fail with 401, which is expected for unauthenticated users
+    }
+
+    return headers;
   }
 
   async request<T>(
@@ -27,8 +35,9 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
+    const authHeaders = await this.getHeaders();
     const headers = {
-      ...this.getHeaders(),
+      ...authHeaders,
       ...options.headers,
     };
 
