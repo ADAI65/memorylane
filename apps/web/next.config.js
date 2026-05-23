@@ -8,8 +8,7 @@ const nextConfig = {
   // Remove X-Powered-By header for security & smaller response
   poweredByHeader: false,
 
-  // Cache ISR pages for 60 seconds at CDN edge
-  swrMinTTL: 60,
+  // Note: CDN cache control is handled via headers in middleware or page configs
 
   // Optimize images
   images: {
