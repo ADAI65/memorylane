@@ -32,6 +32,9 @@ webhook.post('/', async (c) => {
   // Verify webhook signature
   let event: Stripe.Event;
   try {
+    if (!env.STRIPE_WEBHOOK_SECRET) {
+      return c.json({ error: 'Stripe webhook not configured' }, 503);
+    }
     event = getStripe().webhooks.constructEvent(body, sig, env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';

@@ -450,9 +450,8 @@ export function createPremiumWorker(): Worker<PremiumJobData> {
     console.error(`[PremiumWorker] Job ${job?.data?.jobId ?? 'unknown'} failed:`, err.message);
   });
 
-  worker.on('error', (err) => {
-    // Completely suppress connection errors to prevent log spam
-    // These are handled in index.ts before worker creation
+  worker.on('error', (_err) => {
+    // Suppress all connection errors — handled in index.ts before worker creation
   });
 
   console.log('[PremiumWorker] Premium worker created (autorun: false)');
