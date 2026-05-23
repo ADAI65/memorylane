@@ -14,6 +14,7 @@ import { useJobStore } from '@/stores/job-store';
 import { jobApi } from '@/lib/api/jobs';
 import { formatDate, formatRelativeTime } from '@/lib/utils';
 import { ArrowLeft, CheckCircle, AlertCircle, Clock, Loader2, Download } from 'lucide-react';
+import Image from 'next/image';
 import type { RestorationJob } from '@memorylane/shared';
 
 export default function JobDetailPage() {
@@ -118,12 +119,15 @@ export default function JobDetailPage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-2">Before</p>
-                <div className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+                <div className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden relative">
                   {job.upload_id ? (
-                    <img
+                    <Image
                       src={`${process.env.NEXT_PUBLIC_API_URL}/api/uploads/${job.upload_id}/preview`}
                       alt="Before"
-                      className="w-full h-full object-cover rounded-xl"
+                      fill
+                      className="object-cover rounded-xl"
+                      unoptimized
+                      sizes="(max-width: 768px) 100vw, 50vw"
                     />
                   ) : (
                     <span className="text-gray-400 text-sm">No preview</span>
@@ -132,9 +136,15 @@ export default function JobDetailPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-2">After</p>
-                <div className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+                <div className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden relative">
                   {isCompleted && finalResultUrl ? (
-                    <img src={finalResultUrl} alt="After" className="w-full h-full object-cover rounded-xl" />
+                    <Image
+                      src={finalResultUrl}
+                      alt="After"
+                      fill
+                      className="object-cover rounded-xl"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
                   ) : (
                     <div className="text-center">
                       {displayStatus === 'processing' ? (

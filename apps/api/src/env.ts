@@ -5,6 +5,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   API_BASE_URL: z.string().url().default('http://localhost:3001'),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
+  ALLOWED_ORIGINS: z.string().default(''),
   PORT: z.coerce.number().default(3001),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 

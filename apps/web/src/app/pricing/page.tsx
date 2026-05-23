@@ -1,8 +1,18 @@
 // @memorylane/web - Pricing Page (All Free)
+import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Check, Gift, Sparkles, ShieldCheck, Zap, Users } from 'lucide-react';
+
+// Revalidate every 1 hour (pricing content changes rarely)
+export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: 'Pricing - Free AI Photo Restoration',
+  description:
+    'All AI photo restoration features are free. No credit card required. Restore, colorize, animate, and date your old photos with AI.',
+};
 
 export default function PricingPage() {
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-// @memorylane/web - Component: Dashboard Navbar (Chinese, admin-only)
+// @memorylane/web - Component: Dashboard Navbar
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
@@ -16,9 +16,9 @@ export function DashboardNavbar() {
   const { isAuthenticated } = useAuth();
 
   const navLinks = [
-    { href: '/pricing', label: '定价' },
-    { href: '/#services', label: 'AI 服务' },
-    { href: '/#how-it-works', label: '使用流程' },
+    { href: '/pricing', label: 'Pricing' },
+    { href: '/#services', label: 'AI Services' },
+    { href: '/#how-it-works', label: 'How It Works' },
   ];
 
   return (
@@ -50,11 +50,11 @@ export function DashboardNavbar() {
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button size="sm">控制台</Button>
+                <Button size="sm">Dashboard</Button>
               </Link>
             ) : (
               <Link href="/login">
-                <Button variant="ghost" size="sm">登录</Button>
+                <Button variant="ghost" size="sm">Sign In</Button>
               </Link>
             )}
           </div>
@@ -86,11 +86,11 @@ export function DashboardNavbar() {
             <div className="pt-3 border-t border-gray-100 space-y-2">
               {isAuthenticated ? (
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full" size="sm">控制台</Button>
+                  <Button className="w-full" size="sm">Dashboard</Button>
                 </Link>
               ) : (
                 <Link href="/login" onClick={() => setMobileOpen(false)}>
-                  <Button variant="outline" className="w-full" size="sm">登录</Button>
+                  <Button variant="outline" className="w-full" size="sm">Sign In</Button>
                 </Link>
               )}
             </div>

@@ -9,6 +9,12 @@ import { getRestorationQueue } from '../lib/queue.js';
 
 const uploads = new Hono();
 
+// Upload validation constants
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/bmp', 'image/tiff',
+]);
+
 // POST /api/uploads - Create presigned upload
 uploads.post('/', async (c) => {
   const profile = c.get('profile');
@@ -23,6 +29,19 @@ uploads.post('/', async (c) => {
 
   if (!file_name || !file_size || !mime_type) {
     throw new ValidationError('file_name, file_size, and mime_type are required');
+  }
+
+  // Validate file size
+  if (typeof file_size !== 'number' || file_size <= 0) {
+    throw new ValidationError('file_size must be a positive number');
+  }
+  if (file_size > MAX_FILE_SIZE) {
+    throw new ValidationError(`File size exceeds maximum limit of ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+  }
+
+  // Validate MIME type
+  if (!ALLOWED_MIME_TYPES.has(mime_type)) {
+    throw new ValidationError(`File type "${mime_type}" is not supported. Allowed types: ${Array.from(ALLOWED_MIME_TYPES).join(', ')}`);
   }
 
   const storagePath = generateUploadPath(userId, file_name);

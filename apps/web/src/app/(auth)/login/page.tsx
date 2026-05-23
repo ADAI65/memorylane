@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense } from 'react';
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -14,11 +13,26 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') ?? '/dashboard';
+  const errorCode = searchParams.get('error');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Map URL error codes to user-friendly messages
+  const errorMessages: Record<string, string> = {
+    auth_callback_failed: 'Authentication failed. Please try signing in again.',
+    session_expired: 'Your session has expired. Please sign in again.',
+    access_denied: 'Access denied. You may not have permission to access this resource.',
+  };
+
+  // Initialize error from URL params
+  useEffect(() => {
+    if (errorCode && errorMessages[errorCode]) {
+      setError(errorMessages[errorCode]);
+    }
+  }, [errorCode]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +104,12 @@ function LoginForm() {
                 required
               />
               <div className="text-right">
-                {/* TODO: add /forgot-password page */}
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-accent hover:text-accent-dark font-medium"
+                >
+                  Forgot password?
+                </Link>
               </div>
               <Button
                 type="submit"

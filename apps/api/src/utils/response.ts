@@ -1,5 +1,6 @@
 import type { Context } from 'hono';
 import { AppError } from './errors.js';
+import { env } from '../env.js';
 
 type SuccessResponse<T> = {
   success: true;
@@ -64,7 +65,11 @@ export function errorResponse(c: Context, err: AppError) {
  * Global error handler for Hono
  */
 export function errorHandler(err: Error, c: Context) {
-  console.error(`[${new Date().toISOString()}] Error:`, err);
+  // Log full error server-side for debugging
+  console.error(`[${new Date().toISOString()}] [${c.req.method} ${c.req.path}] Error:`, err.message);
+  if (env.NODE_ENV !== 'production') {
+    console.error(err.stack);
+  }
 
   if (err instanceof AppError) {
     return errorResponse(c, err);
@@ -88,16 +93,17 @@ export function errorHandler(err: Error, c: Context) {
     );
   }
 
-  // Unknown errors
+  // Unknown errors — never expose internal details to client in production
+  const isDev = env.NODE_ENV !== 'production';
   return c.json(
     {
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message:
-          c.env?.NODE_ENV === 'production'
-            ? 'An unexpected error occurred'
-            : err.message || 'Internal server error',
+        message: isDev
+          ? (err.message || 'Internal server error')
+          : 'An unexpected error occurred. Please try again later.',
+        ...(isDev && { stack: err.stack }),
       },
     } as ErrorResponse,
     500,

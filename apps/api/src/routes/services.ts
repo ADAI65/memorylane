@@ -1,10 +1,29 @@
 import { Hono } from 'hono';
 import { SERVICE_PRICES, ServiceType } from '@memorylane/shared';
 import { success } from '../utils/response.js';
-import { ValidationError } from '../utils/errors.js';
+import { ValidationError, NotFoundError, ForbiddenError } from '../utils/errors.js';
 import { supabaseAdmin } from '../db/supabase.js';
 
 const services = new Hono();
+
+/**
+ * Verify that an upload belongs to the current user.
+ * Throws ForbiddenError if not, NotFoundError if upload doesn't exist.
+ */
+async function verifyUploadOwnership(userId: string, uploadId: string, label = 'Upload') {
+  const { data: upload, error } = await supabaseAdmin
+    .from('uploads')
+    .select('id, user_id')
+    .eq('id', uploadId)
+    .single();
+
+  if (error || !upload) {
+    throw new NotFoundError(label, uploadId);
+  }
+  if (upload.user_id !== userId) {
+    throw new ForbiddenError('You do not have access to this resource');
+  }
+}
 
 // POST /api/services/animation
 services.post('/animation', async (c) => {
@@ -19,6 +38,8 @@ services.post('/animation', async (c) => {
   if (!upload_id) {
     throw new ValidationError('upload_id is required');
   }
+
+  await verifyUploadOwnership(profile.id, upload_id);
 
   const price = SERVICE_PRICES[ServiceType.PHOTO_ANIMATION];
 
@@ -61,6 +82,11 @@ services.post('/memory-video', async (c) => {
     throw new ValidationError('At least one upload_id is required');
   }
 
+  // Verify all uploads belong to current user
+  for (const uid of upload_ids) {
+    await verifyUploadOwnership(profile.id, uid);
+  }
+
   const price = SERVICE_PRICES[ServiceType.MEMORY_VIDEO];
 
   const { data: job, error } = await supabaseAdmin
@@ -95,6 +121,8 @@ services.post('/historical-dating', async (c) => {
   const { upload_id } = await c.req.json<{ upload_id?: string }>();
 
   if (!upload_id) throw new ValidationError('upload_id is required');
+
+  await verifyUploadOwnership(profile.id, upload_id);
 
   const price = SERVICE_PRICES[ServiceType.HISTORICAL_DATING];
 
@@ -132,6 +160,8 @@ services.post('/era-colorization', async (c) => {
 
   if (!upload_id) throw new ValidationError('upload_id is required');
 
+  await verifyUploadOwnership(profile.id, upload_id);
+
   const price = SERVICE_PRICES[ServiceType.ERA_COLORIZATION];
 
   const { data: job, error } = await supabaseAdmin
@@ -168,6 +198,11 @@ services.post('/face-match', async (c) => {
     throw new ValidationError('At least 2 upload_ids are required for face matching');
   }
 
+  // Verify all uploads belong to current user
+  for (const uid of upload_ids) {
+    await verifyUploadOwnership(profile.id, uid);
+  }
+
   const price = SERVICE_PRICES[ServiceType.FACE_MATCH];
 
   const { data: job, error } = await supabaseAdmin
@@ -201,6 +236,20 @@ services.post('/certificate', async (c) => {
   const { job_id } = await c.req.json<{ job_id?: string }>();
 
   if (!job_id) throw new ValidationError('job_id is required');
+
+  // Verify job belongs to current user
+  const { data: existingJob, error: jobCheckError } = await supabaseAdmin
+    .from('restoration_jobs')
+    .select('id, user_id')
+    .eq('id', job_id)
+    .single();
+
+  if (jobCheckError || !existingJob) {
+    throw new NotFoundError('Job', job_id);
+  }
+  if (existingJob.user_id !== profile.id) {
+    throw new ForbiddenError('You do not have access to this resource');
+  }
 
   const price = SERVICE_PRICES[ServiceType.CERTIFICATE];
 

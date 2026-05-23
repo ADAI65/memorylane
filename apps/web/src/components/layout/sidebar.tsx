@@ -5,6 +5,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuthStore, selectPlan, selectIsAdmin } from '@/stores/auth-store';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +13,9 @@ import {
   LayoutDashboard,
   Upload,
   Sparkles,
-  CreditCard,
   Settings,
   History,
   X,
-  ChevronLeft,
   ShieldCheck,
   LogOut,
 } from 'lucide-react';
@@ -28,30 +27,30 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: '仪表盘', href: '/dashboard', icon: LayoutDashboard },
-  { name: '上传照片', href: '/upload', icon: Upload },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Upload Photo', href: '/upload', icon: Upload },
   {
-    name: 'AI 服务',
+    name: 'AI Services',
     href: '/services',
     icon: Sparkles,
     children: [
-      { name: '照片动画', href: '/services/animation' },
-      { name: '记忆视频', href: '/services/memory-video' },
-      { name: '历史年代', href: '/services/historical-dating' },
-      { name: '年代上色', href: '/services/era-colorization' },
-      { name: '人脸匹配', href: '/services/face-match' },
-      { name: '档案证书', href: '/services/certificate' },
+      { name: 'Photo Animation', href: '/services/animation' },
+      { name: 'Memory Video', href: '/services/memory-video' },
+      { name: 'Historical Dating', href: '/services/historical-dating' },
+      { name: 'Era Colorization', href: '/services/era-colorization' },
+      { name: 'Face Match', href: '/services/face-match' },
+      { name: 'Archive Certificate', href: '/services/certificate' },
     ],
   },
-  { name: '历史记录', href: '/history', icon: History },
-  { name: '账单', href: '/billing', icon: CreditCard },
-  { name: '设置', href: '/settings', icon: Settings },
+  { name: 'History', href: '/history', icon: History },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const plan = useAuthStore(selectPlan);
   const isAdmin = useAuthStore(selectIsAdmin);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -97,7 +96,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Plan badge */}
         <div className="px-4 py-3">
           <Badge variant={plan === 'free' ? 'default' : 'gold'} size="md">
-            {plan === 'free' ? '免费版' : plan === 'pro' ? '专业版' : '无限版'}
+            {plan === 'free' ? 'Free' : plan === 'pro' ? 'Pro' : 'Unlimited'}
           </Badge>
         </div>
 
@@ -163,7 +162,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               )}
             >
               <ShieldCheck className="w-5 h-5 flex-shrink-0" />
-              管理后台
+              Admin Panel
             </Link>
           </div>
         )}
@@ -173,7 +172,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="p-4 border-t border-gray-100">
             <Link href="/pricing">
               <button className="w-full btn-gold text-sm py-2.5">
-                升级专业版
+                Upgrade to Pro
               </button>
             </Link>
           </div>
@@ -181,13 +180,33 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Logout */}
         <div className="p-4 border-t border-gray-100">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-red-600 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            退出登录
-          </button>
+          {showLogoutConfirm ? (
+            <div className="space-y-2">
+              <p className="text-xs text-gray-500 text-center">Are you sure you want to sign out?</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 px-3 py-2 rounded-xl text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowLogoutConfirm(true)}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-red-600 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
+          )}
         </div>
       </aside>
     </>

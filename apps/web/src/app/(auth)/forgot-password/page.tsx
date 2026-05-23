@@ -6,52 +6,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
-import { Sparkles, Mail, CheckCircle } from 'lucide-react';
+import { Sparkles, Mail, ArrowLeft } from 'lucide-react';
 
-export default function SignupPage() {
-  const [fullName, setFullName] = useState('');
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const supabase = createClient();
-      const { error: authError, data } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-        },
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=/settings`,
       });
 
-      if (authError) {
-        setError(authError.message);
+      if (resetError) {
+        setError(resetError.message);
         return;
       }
 
-      // Check if email confirmation is required
-      // If session is null but no error, user needs to confirm email
-      if (!data.session) {
-        setShowConfirmation(true);
-      } else {
-        // Auto-confirmed (e.g., dev mode or email confirmation disabled)
-        window.location.href = '/dashboard';
-      }
+      setEmailSent(true);
     } catch {
       setError('An unexpected error occurred');
     } finally {
@@ -59,8 +38,7 @@ export default function SignupPage() {
     }
   };
 
-  // Email confirmation screen
-  if (showConfirmation) {
+  if (emailSent) {
     return (
       <div className="min-h-screen bg-gradient-hero flex items-center justify-center px-4">
         <div className="w-full max-w-md">
@@ -75,27 +53,25 @@ export default function SignupPage() {
 
           <Card className="p-8" padding="none">
             <div className="p-8 text-center">
-              <div className="mx-auto w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-6">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+              <div className="mx-auto w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-6">
+                <Mail className="w-8 h-8 text-accent" />
               </div>
               <h1 className="text-2xl font-display font-bold text-primary-800 mb-2">
                 Check your email
               </h1>
               <p className="text-gray-500 text-sm mb-6">
-                We&apos;ve sent a confirmation link to{' '}
+                We&apos;ve sent a password reset link to{' '}
                 <span className="font-medium text-primary-800">{email}</span>.
-                Please click the link to verify your account.
+                The link will expire in 1 hour.
               </p>
               <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-500">
-                <Mail className="w-5 h-5 mx-auto mb-2 text-gray-400" />
                 <p>
-                  Didn&apos;t receive the email? Check your spam folder or{' '}
+                  Didn&apos;t receive the email? Check your spam folder, or{' '}
                   <button
-                    onClick={handleSignup}
-                    disabled={isLoading}
+                    onClick={() => setEmailSent(false)}
                     className="text-accent hover:text-accent-dark font-medium"
                   >
-                    resend it
+                    try a different email
                   </button>
                   .
                 </p>
@@ -131,10 +107,10 @@ export default function SignupPage() {
         <Card className="p-8" padding="none">
           <div className="p-8">
             <h1 className="text-2xl font-display font-bold text-primary-800 mb-2">
-              Create your account
+              Reset your password
             </h1>
             <p className="text-gray-500 text-sm mb-6">
-              Get started with unlimited free restorations
+              Enter your email and we&apos;ll send you a link to reset your password.
             </p>
 
             {error && (
@@ -143,15 +119,7 @@ export default function SignupPage() {
               </div>
             )}
 
-            <form onSubmit={handleSignup} className="space-y-4">
-              <Input
-                label="Full Name"
-                type="text"
-                placeholder="John Smith"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
+            <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Email"
                 type="email"
@@ -160,35 +128,24 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <Input
-                label="Password"
-                type="password"
-                placeholder="At least 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                helperText="Must be at least 8 characters"
-                required
-              />
               <Button
                 type="submit"
                 className="w-full"
                 isLoading={isLoading}
               >
-                Create Account
+                Send Reset Link
               </Button>
             </form>
           </div>
 
           <div className="px-8 py-4 bg-gray-50 rounded-b-2xl text-center">
-            <p className="text-sm text-gray-500">
-              Already have an account?{' '}
-              <Link
-                href="/login"
-                className="text-accent hover:text-accent-dark font-medium"
-              >
-                Sign in
-              </Link>
-            </p>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary-800 font-medium"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back to Sign in
+            </Link>
           </div>
         </Card>
       </div>

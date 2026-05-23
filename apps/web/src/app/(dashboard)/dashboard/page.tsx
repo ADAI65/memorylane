@@ -13,7 +13,7 @@ import { useJobStore } from '@/stores/job-store';
 import { jobApi } from '@/lib/api/jobs';
 import { uploadApi } from '@/lib/api/upload';
 import { formatRelativeTime } from '@/lib/utils';
-import { Upload, Sparkles, Image, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, Sparkles, Image, Clock, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import type { RestorationJob, Upload as UploadType } from '@memorylane/shared';
 
 export default function DashboardPage() {
@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const { jobs, setJobs, isLoadingJobs, setLoadingJobs } = useJobStore();
   const [uploads, setUploads] = useState<UploadType[]>([]);
   const [isLoadingUploads, setIsLoadingUploads] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     loadData();
@@ -29,6 +30,7 @@ export default function DashboardPage() {
   const loadData = async () => {
     setLoadingJobs(true);
     setIsLoadingUploads(true);
+    setLoadError('');
     try {
       const [jobsResult, uploadsResult] = await Promise.all([
         jobApi.list({ per_page: 5 }),
@@ -38,6 +40,7 @@ export default function DashboardPage() {
       if (uploadsResult.success && uploadsResult.data) setUploads(uploadsResult.data as any);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+      setLoadError('Failed to load data. Please check your connection and try again.');
     } finally {
       setLoadingJobs(false);
       setIsLoadingUploads(false);
@@ -48,34 +51,55 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Checkout Status Banner */}
+      {/* Error Banner */}
+      {loadError && (
+        <div role="alert" aria-live="assertive" className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span className="flex-1">{loadError}</span>
+          <button
+            onClick={loadData}
+            className="text-red-600 hover:text-red-800 font-medium text-xs underline"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-display font-bold text-primary-800">
-            欢迎回来，{user?.full_name || '朋友'}！
+            Welcome back, {user?.full_name || 'friend'}!
           </h1>
           <p className="text-gray-500 mt-1">
             {isAdmin
-              ? '管理员账号 — 所有限制已解除'
-              : '免费版 — 基础修复无限次，高级视频每天 1 次'}
+              ? 'Admin account — all limits removed'
+              : 'Free plan — unlimited basic restoration, premium video 1x/day'}
           </p>
         </div>
-        <Link href="/upload">
-          <Button>
-            <Upload className="w-4 h-4 mr-2" />
-            上传照片
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <button
+            onClick={loadData}
+            title="Refresh"
+            className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-primary-800 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          <Link href="/upload">
+            <Button>
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Photo
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: '总修复数', value: jobs.length.toString(), icon: Image, color: 'text-accent', bgColor: 'bg-accent/10' },
-          { label: '已完成', value: jobs.filter((j: any) => j.status === 'completed').length.toString(), icon: CheckCircle, color: 'text-green-600', bgColor: 'bg-green-50' },
-          { label: '失败', value: jobs.filter((j: any) => j.status === 'failed').length.toString(), icon: AlertCircle, color: 'text-red-600', bgColor: 'bg-red-50' },
+          { label: 'Total Restorations', value: jobs.length.toString(), icon: Image, color: 'text-accent', bgColor: 'bg-accent/10' },
+          { label: 'Completed', value: jobs.filter((j: any) => j.status === 'completed').length.toString(), icon: CheckCircle, color: 'text-green-600', bgColor: 'bg-green-50' },
+          { label: 'Failed', value: jobs.filter((j: any) => j.status === 'failed').length.toString(), icon: AlertCircle, color: 'text-red-600', bgColor: 'bg-red-50' },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
@@ -107,8 +131,8 @@ export default function DashboardPage() {
                 <Upload className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <CardTitle>上传新照片</CardTitle>
-                <CardDescription>开始新的修复任务</CardDescription>
+                <CardTitle>Upload New Photo</CardTitle>
+                <CardDescription>Start a new restoration job</CardDescription>
               </div>
             </div>
           </Card>
@@ -120,8 +144,8 @@ export default function DashboardPage() {
                 <Sparkles className="w-6 h-6 text-gold-dark" />
               </div>
               <div>
-                <CardTitle>高级服务</CardTitle>
-                <CardDescription>探索 AI 动画及更多功能</CardDescription>
+                <CardTitle>Premium Services</CardTitle>
+                <CardDescription>Explore AI animation & more</CardDescription>
               </div>
             </div>
           </Card>
@@ -133,8 +157,8 @@ export default function DashboardPage() {
                 <Image className="w-6 h-6 text-primary-800" />
               </div>
               <div>
-                <CardTitle>查看历史</CardTitle>
-                <CardDescription>查看所有修复记录</CardDescription>
+                <CardTitle>View History</CardTitle>
+                <CardDescription>Browse all restoration records</CardDescription>
               </div>
             </div>
           </Card>
@@ -145,11 +169,11 @@ export default function DashboardPage() {
       <Card padding="md">
         <CardHeader className="!mb-4 flex items-center justify-between">
           <div>
-            <CardTitle>最近修复</CardTitle>
-            <CardDescription>您最近的 AI 处理任务</CardDescription>
+            <CardTitle>Recent Restorations</CardTitle>
+            <CardDescription>Your latest AI processing jobs</CardDescription>
           </div>
           <Link href="/history">
-            <Button variant="ghost" size="sm">查看全部</Button>
+            <Button variant="ghost" size="sm">View All</Button>
           </Link>
         </CardHeader>
         <CardContent>
@@ -161,9 +185,9 @@ export default function DashboardPage() {
             </div>
           ) : recentJobs.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>暂无修复记录。</p>
+              <p>No restoration history yet.</p>
               <Link href="/upload">
-                <Button variant="ghost" size="sm" className="mt-2">上传您的第一张照片</Button>
+                <Button variant="ghost" size="sm" className="mt-2">Upload Your First Photo</Button>
               </Link>
             </div>
           ) : (
@@ -201,9 +225,9 @@ export default function DashboardPage() {
                       }
                       size="sm"
                     >
-                      {job.status === 'completed' ? '已完成' :
-                       job.status === 'failed' ? '失败' :
-                       job.status === 'processing' ? '处理中' : '待处理'}
+                      {job.status === 'completed' ? 'Completed' :
+                       job.status === 'failed' ? 'Failed' :
+                       job.status === 'processing' ? 'Processing' : 'Pending'}
                     </Badge>
                   </div>
                 </Link>

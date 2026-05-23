@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoryLane 综合审计报告</title>
+<style>
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1d27;
+    --bg-tertiary: #242836;
+    --bg-card: #1e2130;
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0b0;
+    --text-muted: #6b7280;
+    --border: #2d3148;
+    --accent-blue: #4f8ff7;
+    --accent-blue-dim: rgba(79, 143, 247, 0.15);
+    --accent-red: #f56565;
+    --accent-red-dim: rgba(245, 101, 101, 0.12);
+    --accent-orange: #ed8936;
+    --accent-orange-dim: rgba(237, 137, 54, 0.12);
+    --accent-yellow: #ecc94b;
+    --accent-yellow-dim: rgba(236, 201, 75, 0.12);
+    --accent-green: #48bb78;
+    --accent-green-dim: rgba(72, 187, 120, 0.12);
+    --accent-purple: #9f7aea;
+    --accent-purple-dim: rgba(159, 122, 234, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* Header */
+  .report-header {
+    text-align: center;
+    padding: 60px 40px;
+    margin-bottom: 48px;
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .report-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(79, 143, 247, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .report-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #fff, var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .report-header .subtitle {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 32px;
+  }
+  .report-header .date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  /* Stats Row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-number {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .stat-card.total .stat-number { color: var(--accent-blue); }
+  .stat-card.p0 .stat-number { color: var(--accent-red); }
+  .stat-card.p1 .stat-number { color: var(--accent-orange); }
+  .stat-card.p2 .stat-number { color: var(--accent-yellow); }
+
+  /* Severity Distribution */
+  .severity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .severity-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+  }
+  .severity-card h3 {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .severity-card h3 .dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+  }
+  .severity-card.seo h3 .dot { background: var(--accent-blue); }
+  .severity-card.perf h3 .dot { background: var(--accent-orange); }
+  .severity-card.ux h3 .dot { background: var(--accent-purple); }
+  .severity-bar-group { display: flex; flex-direction: column; gap: 8px; }
+  .severity-bar-row {
+    display: flex; align-items: center; gap: 10px; font-size: 0.85rem;
+  }
+  .severity-bar-label { width: 24px; color: var(--text-secondary); flex-shrink: 0; }
+  .severity-bar-track {
+    flex: 1; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden;
+  }
+  .severity-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .severity-bar-value { width: 20px; color: var(--text-muted); text-align: right; flex-shrink: 0; }
+  .bar-p0 { background: var(--accent-red); }
+  .bar-p1 { background: var(--accent-orange); }
+  .bar-p2 { background: var(--accent-yellow); }
+
+  /* Section */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    padding-left: 14px;
+    border-left: 4px solid var(--accent-blue);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .badge-p0 { background: var(--accent-red-dim); color: var(--accent-red); }
+  .badge-p1 { background: var(--accent-orange-dim); color: var(--accent-orange); }
+  .badge-p2 { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+
+  /* Issue Card */
+  .issue-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .issue-card:hover { border-color: var(--accent-blue); }
+  .issue-card.p0 { border-left: 4px solid var(--accent-red); }
+  .issue-card.p1 { border-left: 4px solid var(--accent-orange); }
+  .issue-card.p2 { border-left: 4px solid var(--accent-yellow); }
+  .issue-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .issue-id {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+  }
+  .issue-priority {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .issue-priority.p0 { background: var(--accent-red-dim); color: var(--accent-red); }
+  .issue-priority.p1 { background: var(--accent-orange-dim); color: var(--accent-orange); }
+  .issue-priority.p2 { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+  .issue-category {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .cat-sec { background: var(--accent-red-dim); color: var(--accent-red); }
+  .cat-perf { background: var(--accent-orange-dim); color: var(--accent-orange); }
+  .cat-seo { background: var(--accent-blue-dim); color: var(--accent-blue); }
+  .cat-ux { background: var(--accent-purple-dim); color: var(--accent-purple); }
+  .cat-infra { background: var(--accent-green-dim); color: var(--accent-green); }
+  .issue-title-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .issue-file {
+    font-size: 0.78rem;
+    color: var(--accent-blue);
+    background: var(--accent-blue-dim);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .issue-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+  .issue-impact {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* Roadmap */
+  .roadmap {
+    margin-bottom: 48px;
+  }
+  .phase {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .phase-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+  }
+  .phase-num {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.9rem;
+  }
+  .phase-1 .phase-num { background: var(--accent-red-dim); color: var(--accent-red); }
+  .phase-2 .phase-num { background: var(--accent-orange-dim); color: var(--accent-orange); }
+  .phase-3 .phase-num { background: var(--accent-yellow-dim); color: var(--accent-yellow); }
+  .phase-4 .phase-num { background: var(--accent-blue-dim); color: var(--accent-blue); }
+  .phase-title { font-size: 1.1rem; font-weight: 700; }
+  .phase-subtitle { font-size: 0.82rem; color: var(--text-muted); }
+  .phase-items { display: flex; flex-direction: column; gap: 8px; }
+  .phase-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.88rem; color: var(--text-secondary);
+    padding: 8px 12px; border-radius: 8px;
+    background: var(--bg-primary);
+  }
+  .phase-item .check {
+    color: var(--accent-green);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .phase-item .issue-refs {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin-left: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Audit Source Cards */
+  .audit-sources {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .audit-source {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .audit-source h4 {
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .audit-source .icon { font-size: 1.2rem; }
+  .audit-source .findings {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .audit-source .findings span { margin-right: 4px; }
+  .p0-count { color: var(--accent-red); font-weight: 700; }
+  .p1-count { color: var(--accent-orange); font-weight: 700; }
+  .p2-count { color: var(--accent-yellow); font-weight: 700; }
+
+  /* Footer */
+  .report-footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .severity-grid { grid-template-columns: 1fr; }
+    .audit-sources { grid-template-columns: 1fr; }
+    .report-header h1 { font-size: 1.6rem; }
+  }
+
+  /* Phase item IDs */
+  .issue-ids {
+    display: flex; gap: 4px; flex-wrap: wrap;
+  }
+  .issue-ids span {
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="report-header">
+    <h1>MemoryLane 综合审计报告</h1>
+    <p class="subtitle">后端安全 · 基础设施 · 前端 SEO/性能/UX 三维度全面审查</p>
+    <p class="date">报告生成时间：2026-06-01 | 审计范围：memorylane monorepo 全部代码</p>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-row">
+    <div class="stat-card total">
+      <div class="stat-number">79</div>
+      <div class="stat-label">总发现数</div>
+    </div>
+    <div class="stat-card p0">
+      <div class="stat-number">21</div>
+      <div class="stat-label">P0 必须修复</div>
+    </div>
+    <div class="stat-card p1">
+      <div class="stat-number">29</div>
+      <div class="stat-label">P1 强烈建议</div>
+    </div>
+    <div class="stat-card p2">
+      <div class="stat-number">29</div>
+      <div class="stat-label">P2 建议优化</div>
+    </div>
+  </div>
+
+  <!-- Audit Sources -->
+  <div class="audit-sources">
+    <div class="audit-source">
+      <h4><span class="icon">🔒</span> 后端 API 安全与健壮性</h4>
+      <div class="findings">
+        <span class="p0-count">5 P0</span> ·
+        <span class="p1-count">10 P1</span> ·
+        <span class="p2-count">10 P2</span>
+        <br>共 25 项发现
+      </div>
+    </div>
+    <div class="audit-source">
+      <h4><span class="icon">🏗️</span> 部署、监控与基础设施</h4>
+      <div class="findings">
+        <span class="p0-count">4 P0</span> ·
+        <span class="p1-count">8 P1</span> ·
+        <span class="p2-count">7 P2</span>
+        <br>共 19 项发现
+      </div>
+    </div>
+    <div class="audit-source">
+      <h4><span class="icon">🌐</span> 前端 SEO / 性能 / UX</h4>
+      <div class="findings">
+        <span class="p0-count">12 P0</span> ·
+        <span class="p1-count">13 P1</span> ·
+        <span class="p2-count">10 P2</span>
+        <br>共 35 项发现
+      </div>
+    </div>
+  </div>
+
+  <!-- Severity Distribution -->
+  <div class="severity-grid">
+    <div class="severity-card seo">
+      <h3><span class="dot"></span> SEO（12 项）</h3>
+      <div class="severity-bar-group">
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P0</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p0" style="width:50%"></div></div>
+          <span class="severity-bar-value">6</span>
+        </div>
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P1</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p1" style="width:33%"></div></div>
+          <span class="severity-bar-value">4</span>
+        </div>
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P2</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p2" style="width:17%"></div></div>
+          <span class="severity-bar-value">2</span>
+        </div>
+      </div>
+    </div>
+    <div class="severity-card perf">
+      <h3><span class="dot"></span> 性能（7 项）</h3>
+      <div class="severity-bar-group">
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P0</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p0" style="width:29%"></div></div>
+          <span class="severity-bar-value">2</span>
+        </div>
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P1</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p1" style="width:43%"></div></div>
+          <span class="severity-bar-value">3</span>
+        </div>
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P2</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p2" style="width:29%"></div></div>
+          <span class="severity-bar-value">2</span>
+        </div>
+      </div>
+    </div>
+    <div class="severity-card ux">
+      <h3><span class="dot"></span> UX（16 项）</h3>
+      <div class="severity-bar-group">
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P0</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p0" style="width:25%"></div></div>
+          <span class="severity-bar-value">4</span>
+        </div>
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P1</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p1" style="width:38%"></div></div>
+          <span class="severity-bar-value">6</span>
+        </div>
+        <div class="severity-bar-row">
+          <span class="severity-bar-label">P2</span>
+          <div class="severity-bar-track"><div class="severity-bar-fill bar-p2" style="width:38%"></div></div>
+          <span class="severity-bar-value">6</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== P0 ISSUES ===================== -->
+  <div class="section">
+    <div class="section-title">
+      P0 — 必须修复（21 项）
+      <span class="badge badge-p0">阻断性问题</span>
+    </div>
+
+    <!-- Security P0 -->
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEC-01</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-sec">安全</span>
+        <span class="issue-title-text">.env 中硬编码真实 API 密钥，gitignore 未递归覆盖子目录</span>
+      </div>
+      <p class="issue-desc">.env 文件包含真实的 Supabase、Replicate、OpenAI 等密钥，但 gitignore 规则可能无法覆盖 monorepo 子目录中的 .env 文件，存在泄露到 Git 仓库的风险。</p>
+      <p class="issue-impact">影响：密钥泄露可能导致数据库被入侵、AI API 被盗用产生高额费用</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEC-02</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-sec">安全</span>
+        <span class="issue-title-text">文件上传无大小限制和 MIME 类型校验</span>
+      </div>
+      <p class="issue-file">apps/api/src/routes/uploads.ts</p>
+      <p class="issue-desc">上传接口没有校验文件大小（用户可上传任意大小文件）和 MIME 类型（可上传非图片文件），Zod schema 虽定义但未实际使用。</p>
+      <p class="issue-impact">影响：恶意用户可上传超大文件耗尽存储/带宽，或上传恶意脚本文件</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEC-03</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-sec">安全</span>
+        <span class="issue-title-text">全 API 无速率限制（Rate Limiting）</span>
+      </div>
+      <p class="issue-file">apps/api/src/app.ts</p>
+      <p class="issue-desc">所有 API 端点没有任何请求频率限制，包括认证端点（/auth/*）、文件上传、AI 服务调用等。任何人可以无限次调用。</p>
+      <p class="issue-impact">影响：暴力破解密码、DDoS 攻击、AI API 费用失控</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEC-04</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-sec">安全</span>
+        <span class="issue-title-text">Services 路由缺少所有权校验（IDOR 漏洞）</span>
+      </div>
+      <p class="issue-file">apps/api/src/routes/services.ts</p>
+      <p class="issue-desc">Premium 服务接口接受任意 upload_id，未校验该 upload 是否属于当前登录用户。攻击者可以通过遍历 upload_id 查看其他用户的照片和修复结果。</p>
+      <p class="issue-impact">影响：严重的数据泄露，用户隐私照片可被任意访问</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEC-05</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-sec">安全</span>
+        <span class="issue-title-text">错误信息泄露内部实现细节</span>
+      </div>
+      <p class="issue-file">apps/api/src/app.ts（全局错误处理）</p>
+      <p class="issue-desc">全局错误处理将完整的 Error stack 和内部路径返回给客户端，攻击者可利用这些信息了解服务器架构、文件路径、数据库结构等。</p>
+      <p class="issue-impact">影响：为攻击者提供侦察信息，降低入侵门槛</p>
+    </div>
+
+    <!-- Infra P0 -->
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">INF-01</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-infra">基础设施</span>
+        <span class="issue-title-text">无 CI/CD 流水线，所有部署依赖手动 git push</span>
+      </div>
+      <p class="issue-desc">没有 GitHub Actions 或任何自动化 CI/CD。无自动化测试、无代码审查门禁、无构建验证。每次部署完全依赖手动操作。</p>
+      <p class="issue-impact">影响：构建失败可能直接部署到生产环境，回归问题无法提前发现</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">INF-02</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-infra">基础设施</span>
+        <span class="issue-title-text">无应用错误监控和性能监控（APM）</span>
+      </div>
+      <p class="issue-desc">没有接入 Sentry、Datadog 或任何 APM 工具。生产环境错误只能通过手动查看日志发现，无法实时告警。</p>
+      <p class="issue-impact">影响：用户遇到错误时团队毫不知情，严重影响可靠性感知</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">INF-03</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-infra">基础设施</span>
+        <span class="issue-title-text">CORS 配置硬编码，无环境变量化</span>
+      </div>
+      <p class="issue-file">apps/api/src/app.ts</p>
+      <p class="issue-desc">CORS origin 硬编码为 memorylane-web.vercel.app，如需添加测试环境或自定义域名，必须修改代码重新部署。</p>
+      <p class="issue-impact">影响：部署灵活性差，无法支持多环境</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">INF-04</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-infra">基础设施</span>
+        <span class="issue-title-text">无 HTTPS 强制和 Security Headers</span>
+      </div>
+      <p class="issue-desc">缺少关键安全响应头：Content-Security-Policy、X-Frame-Options、X-Content-Type-Options、Strict-Transport-Security、Referrer-Policy 等。</p>
+      <p class="issue-impact">影响：易受 XSS、点击劫持、MIME 嗅探等攻击</p>
+    </div>
+
+    <!-- SEO P0 -->
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEO-01</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">缺少 Open Graph 和 Twitter Card 标签</span>
+      </div>
+      <p class="issue-file">apps/web/src/app/layout.tsx</p>
+      <p class="issue-desc">metadata 中完全没有 openGraph 和 twitter 配置。社交平台分享时不会显示预览卡片。</p>
+      <p class="issue-impact">影响：Facebook/Twitter/LinkedIn 分享无图无描述，严重降低社交传播转化率</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEO-02</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">缺少结构化数据 JSON-LD</span>
+      </div>
+      <p class="issue-desc">没有任何 JSON-LD Schema 标记（Organization、WebApplication、FAQPage 等），Google 搜索结果无法获得 Rich Snippet。</p>
+      <p class="issue-impact">影响：无法获得星级评分、FAQ 折叠等增强搜索结果展示</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEO-03</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">缺少 robots.txt 和 sitemap.xml</span>
+      </div>
+      <p class="issue-desc">项目中不存在 robots.txt、sitemap.xml、app/robots.ts、app/sitemap.ts 等。Next.js 14 原生支持但项目未使用。</p>
+      <p class="issue-impact">影响：搜索引擎爬虫不知道哪些页面可以索引，Dashboard 等私有页面可能被误索引</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEO-04</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">子页面缺少独立 metadata</span>
+      </div>
+      <p class="issue-desc">除根 layout 外，所有子页面（/pricing、/login、/services/*、/history 等）均没有独立的 title 和 description。</p>
+      <p class="issue-impact">影响：所有页面 title 重复，Google 认为内容重复度高</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEO-05</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">缺少 Canonical URL</span>
+      </div>
+      <p class="issue-desc">全局和各页面均未设置 metadataBase 或 canonical URL，部署域名不确定时可能产生错误的 canonical URL。</p>
+      <p class="issue-impact">影响：潜在重复内容问题</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">SEO-06</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">缺少 favicon、manifest 等 PWA/SEO 基础文件</span>
+      </div>
+      <p class="issue-desc">不存在 favicon.ico、icon.tsx、apple-icon.tsx、manifest.json 等文件。</p>
+      <p class="issue-impact">影响：浏览器标签页无图标，无法添加到主屏幕，OG 分享无图</p>
+    </div>
+
+    <!-- Perf P0 -->
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">PERF-01</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-perf">性能</span>
+        <span class="issue-title-text">使用原生 img 标签而非 next/image（结果图）</span>
+      </div>
+      <p class="issue-file">apps/web/src/app/(dashboard)/restore/[jobId]/page.tsx</p>
+      <p class="issue-desc">修复结果页的 Before/After 图片使用原生 img 标签，无法获得 Next.js 自动优化（懒加载、格式转换、尺寸适配）。</p>
+      <p class="issue-impact">影响：结果图可能很大，加载慢，浪费带宽</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">PERF-02</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-perf">性能</span>
+        <span class="issue-title-text">无页面级缓存策略</span>
+      </div>
+      <p class="issue-desc">没有任何 revalidate、s-maxage、Cache-Control 配置。静态页面（pricing、landing page）无法利用 CDN 缓存。</p>
+      <p class="issue-impact">影响：每次访问都命中服务器，无法利用 Vercel CDN 边缘缓存</p>
+    </div>
+
+    <!-- UX P0 -->
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">UX-01</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-ux">UX</span>
+        <span class="issue-title-text">缺少全局 404 / not-found 页面</span>
+      </div>
+      <p class="issue-desc">没有 app/not-found.tsx，不存在的路由显示 Next.js 默认 404 页面，与应用设计语言完全不一致。</p>
+      <p class="issue-impact">影响：用户体验断裂，品牌感差</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">UX-02</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-ux">UX</span>
+        <span class="issue-title-text">缺少全局 error boundary（error.tsx）</span>
+      </div>
+      <p class="issue-desc">没有 app/error.tsx，组件抛出未捕获错误时显示 Next.js 默认错误页面。</p>
+      <p class="issue-impact">影响：运行时错误暴露技术细节，用户体验极差</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">UX-03</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-ux">UX</span>
+        <span class="issue-title-text">注册后缺少邮箱验证确认页</span>
+      </div>
+      <p class="issue-file">apps/web/src/app/(auth)/signup/page.tsx</p>
+      <p class="issue-desc">注册成功后直接跳转 /dashboard，没有告知用户需要验证邮箱。如果 Supabase 配置了邮箱验证，用户实际还没完成注册。</p>
+      <p class="issue-impact">影响：用户困惑，注册转化漏斗断裂</p>
+    </div>
+
+    <div class="issue-card p0">
+      <div class="issue-header">
+        <span class="issue-id">UX-04</span>
+        <span class="issue-priority p0">P0</span>
+        <span class="issue-category cat-ux">UX</span>
+        <span class="issue-title-text">登录回调失败无错误提示</span>
+      </div>
+      <p class="issue-file">apps/web/src/app/(auth)/auth/callback/route.ts</p>
+      <p class="issue-desc">Auth callback 失败时重定向到 /login?error=auth_callback_failed，但 login 页面没有读取 error 参数来显示错误信息。</p>
+      <p class="issue-impact">影响：用户登录失败后看到空白登录页，不知道为什么</p>
+    </div>
+  </div>
+
+  <!-- ===================== P1 ISSUES ===================== -->
+  <div class="section">
+    <div class="section-title">
+      P1 — 强烈建议（29 项）
+      <span class="badge badge-p1">重要改进</span>
+    </div>
+    <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 16px;">
+      以下仅列出各领域的关键 P1 项。完整 29 项 P1 包括：安全 10 项（输入校验缺失、Zod schema 未启用、CORS 过宽、JWT 过期处理等）、基础设施 8 项（无健康检查、无日志结构化、无自动备份等）、SEO 4 项、性能 3 项、UX 6 项。
+    </p>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">SEC-06</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-sec">安全</span>
+        <span class="issue-title-text">Zod schema 已定义但未在实际路由中使用</span>
+      </div>
+      <p class="issue-desc">多个路由文件中定义了 Zod 验证 schema，但请求处理中未调用 .parse() 或 .safeParse()。等于验证逻辑形同虚设。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">SEC-07</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-sec">安全</span>
+        <span class="issue-title-text">Admin 路由未使用 RBAC 中间件，仅前端检查</span>
+      </div>
+      <p class="issue-desc">Admin API 路由虽有 adminOnlyMiddleware，但部分管理操作（如用户列表）缺少细粒度权限控制。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">UX-05</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-ux">UX</span>
+        <span class="issue-title-text">Dashboard/History 网络错误只有 console.error，用户无感知</span>
+      </div>
+      <p class="issue-desc">数据加载失败时 catch 块只调 console.error，页面显示为空白，用户不知道发生了什么。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">UX-06</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-ux">UX</span>
+        <span class="issue-title-text">Sidebar 存在断链（/billing 页面不存在）</span>
+      </div>
+      <p class="issue-file">apps/web/src/components/layout/sidebar.tsx</p>
+      <p class="issue-desc">"账单" 链接指向 /billing，但项目中不存在该路由页面。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">PERF-03</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-perf">性能</span>
+        <span class="issue-title-text">未使用 dynamic import / code splitting</span>
+      </div>
+      <p class="issue-desc">所有组件和库都是静态 import，包括 lucide-react（Dashboard 一次 import 17 个 icon），6 个 Service 页面都有独立 upload 逻辑但没有延迟加载。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">INF-05</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-infra">基础设施</span>
+        <span class="issue-title-text">无 API 健康检查端点（/health）</span>
+      </div>
+      <p class="issue-desc">后端没有 /health 或 /readiness 端点，Railway 等平台无法自动检测服务健康状态。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">INF-06</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-infra">基础设施</span>
+        <span class="issue-title-text">日志无结构化输出和集中管理</span>
+      </div>
+      <p class="issue-desc">后端日志使用 console.log/error，无结构化 JSON 格式、无日志级别、无集中收集（如 Loki、CloudWatch）。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">SEO-07</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">keywords 标签过于简单，仅 5 个英文关键词</span>
+      </div>
+      <p class="issue-desc">缺少长尾关键词和多语言关键词，应扩充至 15-20 个覆盖核心场景的关键词。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">SEO-08</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">缺少 hreflang 标签</span>
+      </div>
+      <p class="issue-desc">项目 UI 中英文混用（首页英文，Dashboard 中文），但完全没有 hreflang 标签，Google 无法正确理解多语言关系。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">SEO-09</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">语义化 HTML heading 层级不完整</span>
+      </div>
+      <p class="issue-desc">多个子页面的 h1 使用 div + text-2xl 样式模拟，缺少语义化标签。CardTitle 渲染为 h3 但用作页面主标题。</p>
+    </div>
+
+    <div class="issue-card p1">
+      <div class="issue-header">
+        <span class="issue-id">SEO-10</span>
+        <span class="issue-priority p1">P1</span>
+        <span class="issue-category cat-seo">SEO</span>
+        <span class="issue-title-text">Footer 链接指向 # 占位符（About/Blog/Contact/Privacy/Terms）</span>
+      </div>
+      <p class="issue-file">apps/web/src/components/layout/footer.tsx</p>
+      <p class="issue-desc">所有 Company 和 Legal 链接均为 # 死链，且缺少法律页面可能违反 GDPR/CCPA。</p>
+    </div>
+  </div>
+
+  <!-- ===================== ROADMAP ===================== -->
+  <div class="roadmap">
+    <div class="section-title">分阶段修复路线图</div>
+
+    <!-- Phase 1 -->
+    <div class="phase phase-1">
+      <div class="phase-header">
+        <div class="phase-num">1</div>
+        <div>
+          <div class="phase-title">安全加固与 SEO 基础</div>
+          <div class="phase-subtitle">优先级最高，影响数据安全和搜索引擎可见性</div>
+        </div>
+      </div>
+      <div class="phase-items">
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加文件上传校验（大小限制 10MB + MIME 白名单 image/*）
+          <span class="issue-ids"><span>SEC-02</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 API 全局限速（认证端点 5次/min，普通端点 60次/min，上传端点 10次/min）
+          <span class="issue-ids"><span>SEC-03</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          Services 路由添加 upload 所有权校验（WHERE user_id = current_user）
+          <span class="issue-ids"><span>SEC-04</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          全局错误处理屏蔽内部 stack，仅返回安全错误信息
+          <span class="issue-ids"><span>SEC-05</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 robots.ts + sitemap.ts（排除 /dashboard/*, /admin/*, /api/*）
+          <span class="issue-ids"><span>SEO-03</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          根 layout 添加 OG + Twitter Card + metadataBase + canonical
+          <span class="issue-ids"><span>SEO-01</span> <span>SEO-05</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 JSON-LD 结构化数据（Organization + WebApplication）
+          <span class="issue-ids"><span>SEO-02</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          子页面添加独立 metadata（title + description）
+          <span class="issue-ids"><span>SEO-04</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 favicon + manifest.tsx + apple-icon.tsx
+          <span class="issue-ids"><span>SEO-06</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          验证 gitignore 递归覆盖所有 .env 文件 + 检查 git history 是否已泄露
+          <span class="issue-ids"><span>SEC-01</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase phase-2">
+      <div class="phase-header">
+        <div class="phase-num">2</div>
+        <div>
+          <div class="phase-title">用户体验核心修复</div>
+          <div class="phase-subtitle">修复用户流程断裂，提升转化率</div>
+        </div>
+      </div>
+      <div class="phase-items">
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 not-found.tsx（自定义 404 页面，保持设计语言一致）
+          <span class="issue-ids"><span>UX-01</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 error.tsx（全局错误边界，友好的错误 UI + 重试按钮）
+          <span class="issue-ids"><span>UX-02</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          注册流程优化：添加邮箱验证确认页 + 姓名必填校验
+          <span class="issue-ids"><span>UX-03</span> <span>UX-07</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          登录页读取 error 参数显示错误信息
+          <span class="issue-ids"><span>UX-04</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          Dashboard/History 添加错误状态 UI（Toast + 空状态提示）
+          <span class="issue-ids"><span>UX-05</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          移除 sidebar 断链 /billing + 退出登录添加确认对话框
+          <span class="issue-ids"><span>UX-06</span> <span>UX-09</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 /forgot-password 页面
+          <span class="issue-ids"><span>UX-10</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          修复 AdSense 脚本仅在 Landing 页面加载（移除全局 layout 中的加载）
+          <span class="issue-ids"><span>PERF-04</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase phase-3">
+      <div class="phase-header">
+        <div class="phase-num">3</div>
+        <div>
+          <div class="phase-title">基础设施与性能优化</div>
+          <div class="phase-subtitle">提升稳定性、可观测性和加载速度</div>
+        </div>
+      </div>
+      <div class="phase-items">
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 GitHub Actions CI（lint + type-check + build）+ 自动部署
+          <span class="issue-ids"><span>INF-01</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          接入 Sentry 错误监控（前端 + 后端）
+          <span class="issue-ids"><span>INF-02</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          CORS origin 环境变量化 + Security Headers 中间件
+          <span class="issue-ids"><span>INF-03</span> <span>INF-04</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 /health 端点 + 结构化日志（pino）
+          <span class="issue-ids"><span>INF-05</span> <span>INF-06</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          路由启用 Zod 验证 + 启用所有路由的输入校验
+          <span class="issue-ids"><span>SEC-06</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          结果页 img 替换为 next/image + 添加 AVIF 格式支持
+          <span class="issue-ids"><span>PERF-01</span> <span>PERF-06</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          静态页面添加 revalidate 缓存策略
+          <span class="issue-ids"><span>PERF-02</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          lucide-react tree-shaking + Service 页面 dynamic import
+          <span class="issue-ids"><span>PERF-03</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="phase phase-4">
+      <div class="phase-header">
+        <div class="phase-num">4</div>
+        <div>
+          <div class="phase-title">SEO 进阶与用户体验打磨</div>
+          <div class="phase-subtitle">锦上添花，持续优化</div>
+        </div>
+      </div>
+      <div class="phase-items">
+        <div class="phase-item">
+          <span class="check">▸</span>
+          扩充 keywords 至 15-20 个长尾关键词
+          <span class="issue-ids"><span>SEO-07</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          统一全站语言或实现 i18n（当前中英文混用严重）
+          <span class="issue-ids"><span>UX-16</span> <span>SEO-08</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          创建 Footer 法律页面（Privacy Policy / Terms / Cookie Policy）
+          <span class="issue-ids"><span>SEO-10</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          添加 FAQPage + BreadcrumbList 结构化数据
+          <span class="issue-ids"><span>SEO-11</span> <span>SEO-12</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          Hero 区域图片本地化（不再依赖 Unsplash 外部 URL）
+          <span class="issue-ids"><span>PERF-07</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          无障碍优化（aria-label / role / aria-live）
+          <span class="issue-ids"><span>UX-08</span> <span>UX-12</span> <span>UX-13</span></span>
+        </div>
+        <div class="phase-item">
+          <span class="check">▸</span>
+          Dashboard 添加手动刷新按钮
+          <span class="issue-ids"><span>UX-15</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="report-footer">
+    <p>MemoryLane 综合审计报告 · 由 WorkBuddy AI 自动生成</p>
+    <p style="margin-top: 4px;">审计范围：后端安全 · 基础设施 · 前端 SEO/性能/UX | 共 79 项发现</p>
+  </div>
+
+</div>
+</body>
+</html>

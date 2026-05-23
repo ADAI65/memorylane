@@ -1,6 +1,6 @@
 "use client";
 
-// @memorylane/web - Admin Overview Page (中文版)
+// @memorylane/web - Admin Overview Page
 // Only accessible to admin users (is_admin = true)
 
 import { useEffect, useState, useCallback } from 'react';
@@ -75,14 +75,14 @@ function StatCard({
 // ─── Status Mappings ──────────────────────────────────────────
 
 const STATUS_LABELS: Record<string, string> = {
-  completed: '已完成',
-  failed: '失败',
-  processing: '处理中',
-  queued: '队列中',
-  pending: '待处理',
-  canceled: '已取消',
-  active: '活跃',
-  inactive: '未激活',
+  completed: 'Completed',
+  failed: 'Failed',
+  processing: 'Processing',
+  queued: 'Queued',
+  pending: 'Pending',
+  canceled: 'Canceled',
+  active: 'Active',
+  inactive: 'Inactive',
 };
 
 const STATUS_COLORS: Record<string, 'success' | 'error' | 'info' | 'warning' | 'default'> = {
@@ -112,10 +112,10 @@ function UsersTable() {
         setUsers(result.data as unknown as AdminUser[]);
         setMeta(result.meta ?? null);
       } else {
-        setError(result.error?.message || '加载用户失败');
+        setError(result.error?.message || 'Failed to load users');
       }
     } catch {
-      setError('网络错误');
+      setError('Network error');
     } finally {
       setLoading(false);
     }
@@ -129,11 +129,11 @@ function UsersTable() {
     <Card padding="md">
       <CardHeader className="!mb-4 flex items-center justify-between">
         <div>
-          <CardTitle>用户管理</CardTitle>
-          <CardDescription>{meta?.total ?? '—'} 位注册用户</CardDescription>
+          <CardTitle>User Management</CardTitle>
+          <CardDescription>{meta?.total ?? '—'} registered users</CardDescription>
         </div>
         <Button variant="ghost" size="sm" onClick={() => loadUsers(page)}>
-          <RefreshCw className="w-4 h-4 mr-1" /> 刷新
+          <RefreshCw className="w-4 h-4 mr-1" /> Refresh
         </Button>
       </CardHeader>
       <CardContent>
@@ -146,16 +146,16 @@ function UsersTable() {
             {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} width="100%" height={44} />)}
           </div>
         ) : users.length === 0 ? (
-          <p className="text-center py-8 text-gray-400">暂无用户</p>
+          <p className="text-center py-8 text-gray-400">No users yet</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 text-left">
-                  <th className="pb-2 font-medium text-gray-500">用户</th>
-                  <th className="pb-2 font-medium text-gray-500">套餐</th>
-                  <th className="pb-2 font-medium text-gray-500 hidden sm:table-cell">状态</th>
-                  <th className="pb-2 font-medium text-gray-500 hidden md:table-cell">注册时间</th>
+                  <th className="pb-2 font-medium text-gray-500">User</th>
+                  <th className="pb-2 font-medium text-gray-500">Plan</th>
+                  <th className="pb-2 font-medium text-gray-500 hidden sm:table-cell">Status</th>
+                  <th className="pb-2 font-medium text-gray-500 hidden md:table-cell">Joined</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -168,7 +168,7 @@ function UsersTable() {
                         </div>
                         <div>
                           <p className="font-medium text-primary-800 text-sm">
-                            {u.full_name || u.email?.split('@')[0] || '未知'}
+                            {u.full_name || u.email?.split('@')[0] || 'Unknown'}
                           </p>
                           <p className="text-xs text-gray-400">{u.email}</p>
                         </div>
@@ -204,7 +204,7 @@ function UsersTable() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
             <p className="text-xs text-gray-400">
-              第 {page} / {totalPages} 页
+              Page {page} / {totalPages}
             </p>
             <div className="flex gap-1">
               <Button
@@ -234,23 +234,23 @@ function UsersTable() {
 // ─── Jobs Table ───────────────────────────────────────────────
 
 const SERVICE_LABELS: Record<string, string> = {
-  basic_restoration: '基础修复',
-  photo_animation: '照片动画',
-  memory_video: '记忆视频',
-  historical_dating: '历史年代判定',
-  era_colorization: '年代上色',
-  face_match: '人脸匹配',
-  archival_certificate: '档案证书',
-  subscription: '订阅',
+  basic_restoration: 'Basic Restoration',
+  photo_animation: 'Photo Animation',
+  memory_video: 'Memory Video',
+  historical_dating: 'Historical Dating',
+  era_colorization: 'Era Colorization',
+  face_match: 'Face Match',
+  archival_certificate: 'Archive Certificate',
+  subscription: 'Subscription',
 };
 
 const STATUS_FILTER_LABELS: Record<string, string> = {
-  all: '全部',
-  pending: '待处理',
-  queued: '队列中',
-  processing: '处理中',
-  completed: '已完成',
-  failed: '失败',
+  all: 'All',
+  pending: 'Pending',
+  queued: 'Queued',
+  processing: 'Processing',
+  completed: 'Completed',
+  failed: 'Failed',
 };
 
 function JobsTable() {
@@ -272,10 +272,10 @@ function JobsTable() {
         setJobs(result.data as unknown as AdminJob[]);
         setMeta(result.meta ?? null);
       } else {
-        setError(result.error?.message || '加载任务失败');
+        setError(result.error?.message || 'Failed to load jobs');
       }
     } catch {
-      setError('网络错误');
+      setError('Network error');
     } finally {
       setLoading(false);
     }
@@ -289,8 +289,8 @@ function JobsTable() {
     <Card padding="md">
       <CardHeader className="!mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <CardTitle>任务管理</CardTitle>
-          <CardDescription>{meta?.total ?? '—'} 个处理任务</CardDescription>
+          <CardTitle>Job Management</CardTitle>
+          <CardDescription>{meta?.total ?? '—'} processing jobs</CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Status filter chips */}
@@ -311,7 +311,7 @@ function JobsTable() {
             </button>
           ))}
           <Button variant="ghost" size="sm" onClick={() => loadJobs(page, statusFilter)}>
-            <RefreshCw className="w-4 h-4 mr-1" /> 刷新
+            <RefreshCw className="w-4 h-4 mr-1" /> Refresh
           </Button>
         </div>
       </CardHeader>
@@ -325,16 +325,16 @@ function JobsTable() {
             {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} width="100%" height={44} />)}
           </div>
         ) : jobs.length === 0 ? (
-          <p className="text-center py-8 text-gray-400">暂无任务</p>
+          <p className="text-center py-8 text-gray-400">No jobs yet</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 text-left">
-                  <th className="pb-2 font-medium text-gray-500">服务</th>
-                  <th className="pb-2 font-medium text-gray-500">状态</th>
-                  <th className="pb-2 font-medium text-gray-500 hidden sm:table-cell">用户</th>
-                  <th className="pb-2 font-medium text-gray-500 hidden md:table-cell">创建时间</th>
+                  <th className="pb-2 font-medium text-gray-500">Service</th>
+                  <th className="pb-2 font-medium text-gray-500">Status</th>
+                  <th className="pb-2 font-medium text-gray-500 hidden sm:table-cell">User</th>
+                  <th className="pb-2 font-medium text-gray-500 hidden md:table-cell">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -372,7 +372,7 @@ function JobsTable() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
             <p className="text-xs text-gray-400">
-              第 {page} / {totalPages} 页
+              Page {page} / {totalPages}
             </p>
             <div className="flex gap-1">
               <Button
@@ -409,10 +409,10 @@ const PAYMENT_STATUS_COLORS: Record<string, 'success' | 'error' | 'warning' | 'd
 };
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
-  succeeded: '成功',
-  failed: '失败',
-  pending: '待处理',
-  canceled: '已取消',
+  succeeded: 'Succeeded',
+  failed: 'Failed',
+  pending: 'Pending',
+  canceled: 'Canceled',
 };
 
 function RevenueSection() {
@@ -429,10 +429,10 @@ function RevenueSection() {
       if (result.success && result.data) {
         setRevenue(result.data as unknown as AdminRevenue);
       } else {
-        setError(result.error?.message || '加载收入数据失败');
+        setError(result.error?.message || 'Failed to load revenue');
       }
     } catch {
-      setError('网络错误');
+      setError('Network error');
     } finally {
       setLoading(false);
     }
@@ -453,7 +453,7 @@ function RevenueSection() {
       {/* Revenue Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
-          label="总收入"
+          label="Total Revenue"
           value={revenue ? fmt(revenue.subscription_revenue_cents + revenue.one_time_revenue_cents) : '—'}
           icon={DollarSign}
           color="text-gold-dark"
@@ -461,7 +461,7 @@ function RevenueSection() {
           loading={loading}
         />
         <StatCard
-          label="月经常性收入 (MRR)"
+          label="Monthly Recurring Revenue"
           value={revenue ? fmt(revenue.mrr_cents) : '—'}
           icon={Repeat}
           color="text-purple-600"
@@ -469,7 +469,7 @@ function RevenueSection() {
           loading={loading}
         />
         <StatCard
-          label="一次性付费收入"
+          label="One-time Revenue"
           value={revenue ? fmt(revenue.one_time_revenue_cents) : '—'}
           icon={Zap}
           color="text-amber-600"
@@ -483,10 +483,10 @@ function RevenueSection() {
         <CardHeader className="!mb-4">
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-accent" />
-            按服务分类收入
+            Revenue by Service
           </CardTitle>
           <CardDescription>
-            共 {revenue?.total_transactions ?? '—'} 笔交易
+            {revenue?.total_transactions ?? '—'} transactions
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -495,7 +495,7 @@ function RevenueSection() {
               {[1, 2, 3].map((i) => <Skeleton key={i} width="100%" height={40} />)}
             </div>
           ) : breakdownEntries.length === 0 ? (
-            <p className="text-center py-8 text-gray-400">暂无收入数据</p>
+            <p className="text-center py-8 text-gray-400">No revenue data</p>
           ) : (
             <div className="space-y-3">
               {breakdownEntries.map(([serviceType, data]) => {
@@ -530,12 +530,12 @@ function RevenueSection() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-accent" />
-              近期交易
+              Recent Transactions
             </CardTitle>
-            <CardDescription>{txMeta?.total ?? '—'} 条支付记录</CardDescription>
+            <CardDescription>{txMeta?.total ?? '—'} payment records</CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={() => loadRevenue(page)}>
-            <RefreshCw className="w-4 h-4 mr-1" /> 刷新
+            <RefreshCw className="w-4 h-4 mr-1" /> Refresh
           </Button>
         </CardHeader>
         <CardContent>
@@ -548,18 +548,18 @@ function RevenueSection() {
               {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} width="100%" height={44} />)}
             </div>
           ) : transactions.length === 0 ? (
-            <p className="text-center py-8 text-gray-400">暂无交易记录</p>
+            <p className="text-center py-8 text-gray-400">No transactions</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 text-left">
-                    <th className="pb-2 font-medium text-gray-500">客户</th>
-                    <th className="pb-2 font-medium text-gray-500">服务</th>
-                    <th className="pb-2 font-medium text-gray-500">类型</th>
-                    <th className="pb-2 font-medium text-gray-500">金额</th>
-                    <th className="pb-2 font-medium text-gray-500 hidden sm:table-cell">状态</th>
-                    <th className="pb-2 font-medium text-gray-500 hidden md:table-cell">日期</th>
+                    <th className="pb-2 font-medium text-gray-500">Customer</th>
+                    <th className="pb-2 font-medium text-gray-500">Service</th>
+                    <th className="pb-2 font-medium text-gray-500">Type</th>
+                    <th className="pb-2 font-medium text-gray-500">Amount</th>
+                    <th className="pb-2 font-medium text-gray-500 hidden sm:table-cell">Status</th>
+                    <th className="pb-2 font-medium text-gray-500 hidden md:table-cell">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -578,7 +578,7 @@ function RevenueSection() {
                       </td>
                       <td className="py-2.5">
                         <Badge variant={tx.payment_type === 'subscription' ? 'info' : 'gold'} size="sm">
-                          {tx.payment_type === 'subscription' ? '周期性' : '一次性'}
+                          {tx.payment_type === 'subscription' ? 'Recurring' : 'One-time'}
                         </Badge>
                       </td>
                       <td className="py-2.5 font-semibold text-primary-800">
@@ -603,7 +603,7 @@ function RevenueSection() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
               <p className="text-xs text-gray-400">
-                第 {page} / {totalPages} 页
+                Page {page} / {totalPages}
               </p>
               <div className="flex gap-1">
                 <Button variant="ghost" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
@@ -637,10 +637,10 @@ export default function AdminPage() {
         if (result.success && result.data) {
           setStats(result.data as unknown as AdminStats);
         } else {
-          setStatsError(result.error?.message || '加载统计数据失败');
+          setStatsError(result.error?.message || 'Failed to load stats');
         }
       } catch {
-        setStatsError('网络错误');
+        setStatsError('Network error');
       } finally {
         setStatsLoading(false);
       }
@@ -655,9 +655,9 @@ export default function AdminPage() {
         <div className="p-4 rounded-full bg-red-50 mb-4">
           <AlertCircle className="w-8 h-8 text-red-500" />
         </div>
-        <h2 className="text-xl font-bold text-primary-800 mb-2">访问受限</h2>
+        <h2 className="text-xl font-bold text-primary-800 mb-2">Access Denied</h2>
         <p className="text-gray-500 text-center max-w-md">
-          管理后台仅对管理员开放。请联系管理员获取权限。
+          The admin panel is only available to administrators. Please contact the admin for access.
         </p>
       </div>
     );
@@ -669,16 +669,16 @@ export default function AdminPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-display font-bold text-primary-800">管理后台</h1>
+        <h1 className="text-2xl font-display font-bold text-primary-800">Admin Panel</h1>
         <p className="text-gray-500 mt-1">
-          平台数据概览与管理
+          Platform overview and management
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="总用户数"
+          label="Total Users"
           value={stats?.total_users.toString() ?? '—'}
           icon={Users}
           color="text-accent"
@@ -686,7 +686,7 @@ export default function AdminPage() {
           loading={statsLoading}
         />
         <StatCard
-          label="总任务数"
+          label="Total Jobs"
           value={stats?.total_jobs.toString() ?? '—'}
           icon={Image}
           color="text-blue-600"
@@ -694,7 +694,7 @@ export default function AdminPage() {
           loading={statsLoading}
         />
         <StatCard
-          label="已完成"
+          label="Completed"
           value={stats?.completed_jobs.toString() ?? '—'}
           icon={CheckCircle}
           color="text-green-600"
@@ -702,7 +702,7 @@ export default function AdminPage() {
           loading={statsLoading}
         />
         <StatCard
-          label="总收入"
+          label="Total Revenue"
           value={revenue}
           icon={DollarSign}
           color="text-gold-dark"
