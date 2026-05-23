@@ -18,7 +18,9 @@ import {
   X,
   ChevronLeft,
   ShieldCheck,
+  LogOut,
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -50,6 +52,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const plan = useAuthStore(selectPlan);
   const isAdmin = useAuthStore(selectIsAdmin);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  };
 
   return (
     <>
@@ -170,6 +178,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </Link>
           </div>
         )}
+
+        {/* Logout */}
+        <div className="p-4 border-t border-gray-100">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-red-600 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            退出登录
+          </button>
+        </div>
       </aside>
     </>
   );
