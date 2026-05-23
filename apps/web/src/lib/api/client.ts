@@ -1,6 +1,5 @@
 // @memorylane/web - API Client: Base fetch wrapper
 import type { ApiResponse } from '@memorylane/shared';
-import { createClient } from '@/lib/supabase/client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -16,15 +15,19 @@ class ApiClient {
       'Content-Type': 'application/json',
     };
 
-    // Attach Supabase JWT for backend auth
-    try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
+    // Attach Supabase JWT for backend auth (browser only)
+    if (typeof window !== 'undefined') {
+      try {
+        // Dynamic import to avoid SSR issues with createBrowserClient
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      } catch {
+        // No session available — request will fail with 401, which is expected for unauthenticated users
       }
-    } catch {
-      // No session available — request will fail with 401, which is expected for unauthenticated users
     }
 
     return headers;
