@@ -1,4 +1,5 @@
 // @memorylane/web - Landing Page
+import { Suspense } from 'react';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import {
   Video, History, Palette, Users, FileCheck,
   Upload, Cpu, Download,
 } from 'lucide-react';
+import Image from 'next/image';
 
 const premiumServices = [
   {
@@ -102,6 +104,9 @@ const stats = [
   { value: '10s', label: 'Avg. Processing' },
 ];
 
+// Force static generation — no dynamic data on homepage
+export const dynamic = 'force-static';
+
 export default function HomePage() {
   return (
     <>
@@ -170,20 +175,24 @@ export default function HomePage() {
                 <div className="rounded-3xl overflow-hidden shadow-2xl shadow-black/40 transform perspective-1000 rotate-y-[-5deg] hover:rotate-y-0 transition-transform duration-500">
                   <div className="grid grid-cols-2">
                     <div className="relative aspect-[4/3] overflow-hidden">
-                      <img
+                      <Image
                         src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&q=80&sat=-100&con=-30"
                         alt="Before restoration"
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 400px"
+                        className="object-cover"
                       />
                       <span className="absolute bottom-3 left-3 px-3 py-1 bg-accent/90 text-white text-xs font-semibold uppercase tracking-wider rounded-md">
                         Before
                       </span>
                     </div>
                     <div className="relative aspect-[4/3] overflow-hidden">
-                      <img
+                      <Image
                         src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&q=80"
                         alt="After restoration"
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 400px"
+                        className="object-cover"
                       />
                       <span className="absolute bottom-3 left-3 px-3 py-1 bg-gold/90 text-primary-900 text-xs font-semibold uppercase tracking-wider rounded-md">
                         After
@@ -220,7 +229,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Premium Services ─────────────────────────── */}
+        {/* ── Below-fold: lazy loaded ────────────────── */}
+        <Suspense fallback={null}>
+          {/* ── Premium Services ─────────────────────────── */}
         <section id="services" className="section-y bg-surface-muted relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent" />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -398,6 +409,7 @@ export default function HomePage() {
             </Link>
           </div>
         </section>
+        </Suspense>
       </main>
       <Footer />
     </>
