@@ -69,7 +69,7 @@ export default function SignupPage() {
               Create your account
             </h1>
             <p className="text-gray-500 text-sm mb-6">
-              Get started with 1 free restoration per day
+              Get started with unlimited free restorations
             </p>
 
             {error && (

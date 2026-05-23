@@ -302,7 +302,7 @@ export default function HomePage() {
             </div>
 
             <p className="text-center text-gray-500 mt-10">
-              <strong className="text-gold">All services are free</strong> — basic services unlimited, premium video services 1 free per day
+              <strong className="text-gold">All services are free</strong> — basic restorations unlimited, premium video services 1 free per day
             </p>
           </div>
         </section>
@@ -389,7 +389,7 @@ export default function HomePage() {
               Ready to Restore Your Memories?
             </h2>
             <p className="text-white/75 text-lg mb-10">
-              Get your first restoration free. No credit card required.
+              Start restoring your photos for free. No credit card required.
             </p>
             <Link href="/signup">
               <Button size="lg" className="btn-gold text-lg px-10 py-4">

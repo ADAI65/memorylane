@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton, CardSkeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
 import { useJobStore } from '@/stores/job-store';
@@ -18,7 +17,7 @@ import { Upload, Sparkles, Image, Clock, CheckCircle, AlertCircle } from 'lucide
 import type { RestorationJob, Upload as UploadType } from '@memorylane/shared';
 
 export default function DashboardPage() {
-  const { user, plan } = useAuth();
+  const { user, plan, isAdmin } = useAuth();
   const { jobs, setJobs, isLoadingJobs, setLoadingJobs } = useJobStore();
   const [uploads, setUploads] = useState<UploadType[]>([]);
   const [isLoadingUploads, setIsLoadingUploads] = useState(true);
@@ -45,9 +44,6 @@ export default function DashboardPage() {
     }
   };
 
-  const dailyUsed = user?.daily_free_used ?? 0;
-  const dailyLimit = plan === 'free' ? 1 : plan === 'pro' ? 50 : 999;
-  const dailyRemaining = Math.max(0, dailyLimit - dailyUsed);
   const recentJobs = jobs.slice(0, 5);
 
   return (
@@ -61,9 +57,9 @@ export default function DashboardPage() {
             Welcome back, {user?.full_name || 'there'}!
           </h1>
           <p className="text-gray-500 mt-1">
-            {plan === 'free'
-              ? `Free plan: ${dailyRemaining} restoration remaining today`
-              : `You're on the ${plan} plan`}
+            {isAdmin
+              ? 'Admin account — all limits bypassed'
+              : 'Free plan — basic restorations unlimited, premium video 1/day'}
           </p>
         </div>
         <Link href="/upload">
@@ -74,22 +70,10 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Daily usage bar (free users) */}
-      {plan === 'free' && (
-        <Card padding="md">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Daily Free Restorations</span>
-            <span className="text-sm text-gray-500">{dailyUsed} / {dailyLimit}</span>
-          </div>
-          <Progress value={dailyUsed} max={dailyLimit} variant="accent" size="md" />
-        </Card>
-      )}
-
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Total Restorations', value: jobs.length.toString(), icon: Image, color: 'text-accent', bgColor: 'bg-accent/10' },
-          { label: 'Daily Left', value: dailyRemaining.toString(), icon: Clock, color: 'text-gold', bgColor: 'bg-gold/10' },
           { label: 'Completed', value: jobs.filter((j: any) => j.status === 'completed').length.toString(), icon: CheckCircle, color: 'text-green-600', bgColor: 'bg-green-50' },
           { label: 'Failed', value: jobs.filter((j: any) => j.status === 'failed').length.toString(), icon: AlertCircle, color: 'text-red-600', bgColor: 'bg-red-50' },
         ].map((stat) => {
