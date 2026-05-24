@@ -1,8 +1,33 @@
 // @memorylane/web - Next.js Middleware
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
+// Public routes that don't need Supabase auth — skip the round-trip to speed them up
+const PUBLIC_PATHS = new Set([
+  '/',
+  '/pricing',
+  '/privacy',
+  '/terms',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/manifest.json',
+]);
+
+// Public path prefixes (e.g. /blog/*, /#anchors)
+const PUBLIC_PREFIXES = ['/login', '/signup', '/forgot-password'];
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Fast-path: skip Supabase auth check for fully public pages
+  // This eliminates a network round-trip (~200-400ms) for every public page load
+  if (
+    PUBLIC_PATHS.has(pathname) ||
+    PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))
+  ) {
+    return NextResponse.next({ request });
+  }
+
   return await updateSession(request);
 }
 

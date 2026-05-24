@@ -1,7 +1,7 @@
+// @memorylane/web - Root Error Boundary
 'use client';
 
 import { useEffect } from 'react';
-import * as Sentry from '@sentry/nextjs';
 
 export default function Error({
   error,
@@ -11,8 +11,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Report error to Sentry
-    Sentry.captureException(error);
+    // Log error for debugging (replace with Sentry when DSN is configured)
+    console.error('[Error Boundary]', error);
   }, [error]);
 
   return (
@@ -21,7 +21,7 @@ export default function Error({
         <h1 className="text-8xl font-bold text-red-100 mb-4">!</h1>
         <h2 className="text-2xl font-semibold text-gray-800 mb-2">Something Went Wrong</h2>
         <p className="text-gray-500 mb-8 max-w-md mx-auto">
-          An unexpected error occurred. Our team has been notified. Please try again.
+          An unexpected error occurred. Please try again or go back to the home page.
         </p>
         <div className="flex gap-4 justify-center">
           <button

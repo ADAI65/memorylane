@@ -1,6 +1,5 @@
+// @memorylane/web - Global Error Boundary (catches root layout errors)
 'use client';
-
-import * as Sentry from '@sentry/nextjs';
 
 export default function GlobalError({
   error,
@@ -9,7 +8,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  Sentry.captureException(error);
+  // Log error for debugging (replace with Sentry when DSN is configured)
+  console.error('[Global Error]', error);
 
   return (
     <html lang="en">
@@ -27,7 +27,7 @@ export default function GlobalError({
               Something Went Wrong
             </h2>
             <p style={{ color: '#6b7280', marginBottom: '2rem', maxWidth: '24rem' }}>
-              An unexpected error occurred. Our team has been notified.
+              An unexpected error occurred. Please try again.
             </p>
             <button
               onClick={reset}
