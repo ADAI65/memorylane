@@ -52,8 +52,9 @@ export default function SignupPage() {
         // Auto-confirmed (e.g., dev mode or email confirmation disabled)
         window.location.href = '/dashboard';
       }
-    } catch {
-      setError('An unexpected error occurred');
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      setError(err?.message || 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
