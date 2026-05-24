@@ -12,7 +12,9 @@
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@memorylane/shared": ["./src/lib/shared/index.js"],
+      "@memorylane/shared/*": ["./src/lib/shared/*"]
     },
     "noUnusedLocals": false,
     "noUnusedParameters": false,
