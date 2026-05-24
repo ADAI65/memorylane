@@ -39,3 +39,7 @@ coverage/
 *.log
 npm-debug.log*
 pnpm-debug.log*
+.vercel
+
+# Vercel deployment
+apps/web/.next/cache/
