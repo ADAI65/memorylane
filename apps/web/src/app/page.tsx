@@ -173,27 +173,29 @@ export default function HomePage() {
               <div className="hidden lg:block">
                 <div className="rounded-3xl overflow-hidden shadow-2xl shadow-black/40 transform perspective-1000 rotate-y-[-5deg] hover:rotate-y-0 transition-transform duration-500">
                   <div className="grid grid-cols-2">
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-300 via-gray-200 to-gray-400">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-20 h-24 mx-auto mb-2 rounded-lg bg-gradient-to-b from-gray-400 to-gray-500 opacity-60" />
-                          <div className="w-16 h-3 mx-auto rounded bg-gray-400/50 mb-1" />
-                          <div className="w-12 h-2 mx-auto rounded bg-gray-400/30" />
-                        </div>
-                      </div>
-                      <span className="absolute bottom-3 left-3 px-3 py-1 bg-accent/90 text-white text-xs font-semibold uppercase tracking-wider rounded-md">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-900">
+                      <img
+                        src="/images/hero-before.jpg"
+                        alt="Original damaged vintage photo — faded colors, scratches, and water stains"
+                        className="w-full h-full object-cover"
+                        width={600}
+                        height={450}
+                      />
+                      <span className="absolute bottom-3 left-3 px-3 py-1 bg-accent/90 text-white text-xs font-semibold uppercase tracking-wider rounded-md backdrop-blur-sm">
                         Before
                       </span>
                     </div>
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-20 h-24 mx-auto mb-2 rounded-lg bg-gradient-to-b from-amber-300 to-orange-200 opacity-80" />
-                          <div className="w-16 h-3 mx-auto rounded bg-amber-300/50 mb-1" />
-                          <div className="w-12 h-2 mx-auto rounded bg-amber-300/30" />
-                        </div>
-                      </div>
-                      <span className="absolute bottom-3 left-3 px-3 py-1 bg-gold/90 text-primary-900 text-xs font-semibold uppercase tracking-wider rounded-md">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-900">
+                      <img
+                        src="/images/hero-after.jpg"
+                        alt="AI-restored photo — vivid colors, sharp details, all damage removed"
+                        className="w-full h-full object-cover"
+                        width={600}
+                        height={450}
+                      />
+                      <span className="absolute bottom-3 left-3 px-3 py-1 bg-gold/90 text-primary-900 text-xs font-semibold uppercase tracking-wider rounded-md backdrop-blur-sm">
                         After
                       </span>
                     </div>
