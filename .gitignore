@@ -43,3 +43,6 @@ pnpm-debug.log*
 
 # Vercel deployment
 apps/web/.next/cache/
+
+# Turbo cache
+.turbo/cache/
