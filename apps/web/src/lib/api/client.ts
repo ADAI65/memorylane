@@ -2,6 +2,7 @@
 import type { ApiResponse } from '@memorylane/shared';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_TIMEOUT_MS = 8000; // 8 second timeout for all API calls
 
 class ApiClient {
   private baseUrl: string;
@@ -44,25 +45,45 @@ class ApiClient {
       ...options.headers,
     };
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-      credentials: 'include', // Send cookies for auth
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
-    const data = await response.json();
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        credentials: 'include', // Send cookies for auth
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
+      clearTimeout(timeoutId);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error || {
+            code: 'UNKNOWN_ERROR',
+            message: data.message || 'An unexpected error occurred',
+          },
+        };
+      }
+
+      return data;
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        return {
+          success: false,
+          error: { code: 'TIMEOUT', message: 'Request timed out. Please try again.' },
+        };
+      }
       return {
         success: false,
-        error: data.error || {
-          code: 'UNKNOWN_ERROR',
-          message: data.message || 'An unexpected error occurred',
-        },
+        error: { code: 'NETWORK_ERROR', message: 'Network error. Please check your connection.' },
       };
     }
-
-    return data;
   }
 
   async get<T>(endpoint: string, params?: Record<string, string>): Promise<ApiResponse<T>> {

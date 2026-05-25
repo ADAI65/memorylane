@@ -1,19 +1,22 @@
 // @memorylane/web - Hook: useAuth - authentication state
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore, selectPlan, selectIsPro, selectIsAdmin } from '@/stores/auth-store';
 
 export function useAuth() {
   const store = useAuthStore();
   const router = useRouter();
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (store.isLoading && !store.user) {
+    // Initialize exactly once per session, regardless of which component mounts first
+    if (!initializedRef.current) {
+      initializedRef.current = true;
       store.initialize();
     }
-  }, [store]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     user: store.user,
