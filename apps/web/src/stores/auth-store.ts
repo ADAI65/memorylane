@@ -30,13 +30,42 @@ export const useAuthStore = create<AuthState>((set) => ({
       } = await supabase.auth.getUser();
 
       if (authUser) {
-        const { data } = await authApi.getProfile();
-        if (data) {
-          set({ user: data, isAuthenticated: true });
+        // Try to get full profile from backend
+        try {
+          const { data } = await authApi.getProfile();
+          if (data) {
+            set({ user: data, isAuthenticated: true });
+            return;
+          }
+        } catch {
+          // Backend unavailable or no profile yet — fall through to fallback
         }
+
+        // Fallback: use Supabase session data directly so isAuthenticated is still true
+        const now = new Date().toISOString();
+        const fallbackProfile: Profile = {
+          id: authUser.id,
+          email: authUser.email ?? '',
+          full_name: authUser.user_metadata?.full_name ?? null,
+          avatar_url: authUser.user_metadata?.avatar_url ?? null,
+          plan: 'free' as UserPlan,
+          subscription_status: 'inactive',
+          stripe_customer_id: null,
+          is_admin: false,
+          daily_free_used: 0,
+          daily_free_reset_at: now,
+          premium_usage_today: 0,
+          premium_usage_reset_at: now,
+          created_at: authUser.created_at,
+          updated_at: now,
+        };
+        set({ user: fallbackProfile, isAuthenticated: true });
+      } else {
+        set({ user: null, isAuthenticated: false });
       }
     } catch (error) {
       console.error('Auth initialization error:', error);
+      set({ user: null, isAuthenticated: false });
     } finally {
       set({ isLoading: false });
     }
@@ -46,9 +75,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user, isAuthenticated: !!user }),
 
   logout: async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    await authApi.logout();
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore if backend is unavailable
+    }
     set({ user: null, isAuthenticated: false });
   },
 
@@ -59,7 +96,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ user: data, isAuthenticated: true });
       }
     } catch {
-      // silently fail
+      // silently fail — keep existing auth state
     }
   },
 }));
