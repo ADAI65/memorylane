@@ -16,10 +16,13 @@ export const authMiddleware = createMiddleware(async (c, next) => {
   const token = authHeader.slice(7);
 
   // Create a Supabase client with the user's JWT
-  // Server-side JWT verification uses the Authorization header, not the anon key
+  // Disable realtime to avoid Node.js 20 WebSocket issues
   const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, 'https://placeholder.supabase.co', {
     global: {
       headers: { Authorization: `Bearer ${token}` },
+    },
+    realtime: {
+      channels: 'none' as any,
     },
   });
 
