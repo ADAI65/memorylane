@@ -11,20 +11,17 @@ if (typeof globalThis.WebSocket === 'undefined') {
 }
 
 import { createMiddleware } from 'hono/factory';
-import { jwtVerify, errors as JoseErrors } from 'jose';
+import { jwtVerify, createRemoteJWKSet, errors as JoseErrors } from 'jose';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../env.js';
 import { UnauthorizedError } from '../utils/errors.js';
 import type { Profile } from '@memorylane/shared';
 
-// Cache the JWT secret as Uint8Array
-let jwtSecretBytes: Uint8Array | null = null;
-function getJwtSecret(): Uint8Array {
-  if (!jwtSecretBytes) {
-    jwtSecretBytes = new TextEncoder().encode(env.SUPABASE_JWT_SECRET);
-  }
-  return jwtSecretBytes;
-}
+// Remote JWKS for Supabase Auth ECDSA key verification
+const JWKS_URL = new URL(`${env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/.well-known/jwks.json`);
+const jwks = createRemoteJWKSet(JWKS_URL, {
+  cooldownDuration: 60000, // Cache JWKS for 60 seconds
+});
 
 /**
  * Middleware: Verify Supabase JWT and attach user to context
@@ -37,11 +34,13 @@ export const authMiddleware = createMiddleware(async (c, next) => {
 
   const token = authHeader.slice(7);
 
-  // Verify JWT locally using jose (no network call needed)
+  // Verify JWT using Supabase's public JWKS (ECDSA ES256)
   let payload: Record<string, unknown>;
   try {
-    const { payload: verifiedPayload } = await jwtVerify(token, getJwtSecret(), {
-      clockTolerance: 60, // 60 seconds leeway for clock skew
+    const { payload: verifiedPayload } = await jwtVerify(token, jwks, {
+      clockTolerance: 60,
+      issuer: `${env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1`,
+      audience: 'authenticated',
     });
     payload = verifiedPayload as Record<string, unknown>;
   } catch (err) {
