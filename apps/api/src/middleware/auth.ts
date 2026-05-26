@@ -28,9 +28,14 @@ export const authMiddleware = createMiddleware(async (c, next) => {
   const token = authHeader.slice(7);
 
   // Create a Supabase client with the user's JWT
-  const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, 'https://placeholder.supabase.co', {
+  // Use anon key so getUser() can verify the token against Supabase auth server
+  const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     global: {
       headers: { Authorization: `Bearer ${token}` },
+    },
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
     },
     // @ts-expect-error - channels is not in the type definition but works at runtime
     realtime: { channels: 'none' },
