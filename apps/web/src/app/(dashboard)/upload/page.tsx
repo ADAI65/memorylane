@@ -2,7 +2,7 @@
 
 // @memorylane/web - Upload Page (all services free)
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -81,6 +81,7 @@ export default function UploadPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadResult, setUploadResult] = useState<Upload | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -272,6 +273,7 @@ export default function UploadPage() {
             )}
           >
             <input
+              ref={fileInputRef}
               type="file"
               id="file-upload"
               accept="image/jpeg,image/png,image/webp,image/tiff"
@@ -313,9 +315,13 @@ export default function UploadPage() {
                   <p className="text-gray-600">Drag & drop your photo here</p>
                   <p className="text-sm text-gray-400 mt-1">or</p>
                 </div>
-                <label htmlFor="file-upload">
-                  <button className="btn-outline text-sm px-4 py-2">Browse Files</button>
-                </label>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn-outline text-sm px-4 py-2"
+                >
+                  Browse Files
+                </button>
                 <p className="text-xs text-gray-400">JPEG, PNG, WebP, TIFF — Max 20MB</p>
               </div>
             )}
