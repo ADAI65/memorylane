@@ -1,3 +1,8 @@
+// Polyfill WebSocket for Node.js < 22 (e.g. Railway default)
+// Must be before any Supabase imports
+import { WebSocket } from 'ws';
+Object.assign(globalThis, { WebSocket });
+
 import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { createApp } from './app.js';
