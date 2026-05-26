@@ -1,5 +1,6 @@
 import { createClient, SupabaseClientOptions } from '@supabase/supabase-js';
 import { env } from '../env.js';
+import ws from 'ws';
 
 const options: SupabaseClientOptions<'generic'> = {
   auth: {
@@ -7,10 +8,9 @@ const options: SupabaseClientOptions<'generic'> = {
     persistSession: false,
   },
   realtime: {
-    // Disable realtime on backend — no subscriptions needed
-    // This avoids the "Node.js 20 without native WebSocket" error
-    // that occurs even with ws transport on some deployments
-    channels: 'none' as any,
+    // Provide ws transport for Node.js < 22 compatibility (Railway may run Node 20)
+    // @ts-ignore – Supabase expects a WebSocket constructor
+    transport: ws,
   },
 };
 
