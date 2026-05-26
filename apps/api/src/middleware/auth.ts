@@ -1,3 +1,6 @@
+// WebSocket polyfill MUST be first import for Node.js < 22 compatibility
+import '../ws-polyfill.js';
+
 import { createMiddleware } from 'hono/factory';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../env.js';

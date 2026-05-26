@@ -1,3 +1,6 @@
+// WebSocket polyfill MUST be first import for Node.js < 22 compatibility
+import '../ws-polyfill.js';
+
 import { createClient, SupabaseClientOptions } from '@supabase/supabase-js';
 import { env } from '../env.js';
 import ws from 'ws';

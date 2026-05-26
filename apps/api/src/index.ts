@@ -1,8 +1,4 @@
-// Polyfill WebSocket for Node.js < 22 (e.g. Railway default)
-// Must be before any Supabase imports
-import { WebSocket } from 'ws';
-Object.assign(globalThis, { WebSocket });
-
+// index.ts - keep clean
 import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { createApp } from './app.js';
@@ -20,15 +16,11 @@ let closePremiumWorker: (() => Promise<void>) | null = null;
 // ── Start Worker (dynamic import — only if Redis is reachable) ──
 async function startWorker() {
   try {
-    // 1. Test Redis connectivity first
     const redis = getRedis();
     await redis.connect();
     console.log('[Worker] Redis connected successfully');
-
-    // 2. Initialize AI providers
     await initializeProviders();
 
-    // 3. Dynamically import and start workers ONLY after Redis is confirmed
     const { createRestorationWorker } = await import('./workers/restoration.js');
     const { createPremiumWorker } = await import('./workers/premium.js');
 
@@ -37,7 +29,6 @@ async function startWorker() {
     await restorationWorker.run();
     await premiumWorker.run();
 
-    // Save close functions for shutdown
     closeRestorationWorker = () => restorationWorker.close();
     closePremiumWorker = () => premiumWorker.close();
 
@@ -51,7 +42,6 @@ async function startWorker() {
 // ── Graceful Shutdown ────────────────────────────────────
 async function gracefulShutdown(signal: string) {
   console.log(`\n[Server] ${signal} received, shutting down gracefully...`);
-
   try {
     if (closeRestorationWorker) await closeRestorationWorker();
     if (closePremiumWorker) await closePremiumWorker();
@@ -61,7 +51,6 @@ async function gracefulShutdown(signal: string) {
   } catch (err) {
     console.error('[Server] Error during shutdown:', err);
   }
-
   process.exit(0);
 }
 
@@ -76,7 +65,7 @@ serve(
   },
   (info: { port: number }) => {
     console.log(`
-╔══════════════════════════════════════════╗
+╔════════════════════════════════════════════╗
 ║         MemoryLane API Server           ║
 ╠══════════════════════════════════════════╣
 ║  Environment: ${env.NODE_ENV.padEnd(26)}║
@@ -85,8 +74,6 @@ serve(
 ║  Worker:      ${'Restoration (BullMQ)'.padEnd(26)}║
 ╚══════════════════════════════════════════╝
     `);
-
-    // Start worker after server is up
     startWorker();
   },
 );
