@@ -89,7 +89,7 @@ export default function UploadPage() {
 
   const { addUpload, setCurrentUpload } = useUploadStore();
 
-  const currentService = SERVICE_OPTIONS.find((s) => s.type === selectedService)!;
+  const currentService = SERVICE_OPTIONS.find((s) => s.type === selectedService) || SERVICE_OPTIONS[0];
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
