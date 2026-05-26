@@ -93,16 +93,14 @@ export function errorHandler(err: Error, c: Context) {
     );
   }
 
-  // Unknown errors — never expose internal details to client in production
+  // Unknown errors — temporarily expose error message for debugging
   const isDev = env.NODE_ENV !== 'production';
   return c.json(
     {
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: isDev
-          ? (err.message || 'Internal server error')
-          : 'An unexpected error occurred. Please try again later.',
+        message: err.message || 'Internal server error',
         ...(isDev && { stack: err.stack }),
       },
     } as ErrorResponse,
