@@ -111,6 +111,10 @@ export function createApp() {
     status: 'ok',
     timestamp: Date.now(),
     version: '0.1.0',
+    node_version: process.version,
+    has_native_ws: typeof WebSocket !== 'undefined',
+    has_global_ws: typeof globalThis.WebSocket !== 'undefined',
+    preload_ran: !!process.env.__PRELOAD_RAN,
   }));
 
   // API info

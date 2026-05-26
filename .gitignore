@@ -45,3 +45,4 @@ apps/web/.next/cache/
 
 # Turbo cache
 .turbo/cache/
+dist/

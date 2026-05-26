@@ -131,10 +131,12 @@ export default function UploadPage() {
         });
         xhr.addEventListener('load', () => {
           if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error('Upload failed'));
+          else reject(new Error(`Upload failed: HTTP ${xhr.status} ${xhr.statusText}`));
         });
-        xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+        xhr.addEventListener('error', () => reject(new Error('Upload failed: Network error')));
         xhr.open('PUT', upload_url);
+        xhr.setRequestHeader('Content-Type', selectedFile.type);
+        xhr.setRequestHeader('x-upsert', 'true');
         xhr.send(selectedFile);
       });
 

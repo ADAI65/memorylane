@@ -1,5 +1,14 @@
-// WebSocket polyfill MUST be first import for Node.js < 22 compatibility
-import '../ws-polyfill.js';
+// ── WebSocket polyfill for Node.js < 22 ──
+import { createRequire } from 'node:module';
+const _require = createRequire(import.meta.url);
+if (typeof globalThis.WebSocket === 'undefined') {
+  const wsMod = _require('ws');
+  Object.defineProperty(globalThis, 'WebSocket', {
+    value: wsMod.WebSocket || wsMod,
+    writable: true,
+    configurable: true,
+  });
+}
 
 import { createMiddleware } from 'hono/factory';
 import { createClient } from '@supabase/supabase-js';
@@ -19,14 +28,12 @@ export const authMiddleware = createMiddleware(async (c, next) => {
   const token = authHeader.slice(7);
 
   // Create a Supabase client with the user's JWT
-  // Disable realtime to avoid Node.js 20 WebSocket issues
   const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, 'https://placeholder.supabase.co', {
     global: {
       headers: { Authorization: `Bearer ${token}` },
     },
-    realtime: {
-      channels: 'none' as any,
-    },
+    // @ts-expect-error - channels is not in the type definition but works at runtime
+    realtime: { channels: 'none' },
   });
 
   const { data: { user }, error: authError } = await supabase.auth.getUser(token);

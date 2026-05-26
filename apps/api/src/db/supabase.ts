@@ -1,20 +1,29 @@
-// WebSocket polyfill MUST be first import for Node.js < 22 compatibility
-import '../ws-polyfill.js';
+// ── WebSocket polyfill for Node.js < 22 ──
+// ESM modules evaluate imports in declaration order. By using createRequire
+// (from built-in node:module) before importing @supabase/supabase-js,
+// the polyfill is guaranteed to run before Supabase checks globalThis.WebSocket.
+import { createRequire } from 'node:module';
+const _require = createRequire(import.meta.url);
+if (typeof globalThis.WebSocket === 'undefined') {
+  const wsMod = _require('ws');
+  Object.defineProperty(globalThis, 'WebSocket', {
+    value: wsMod.WebSocket || wsMod,
+    writable: true,
+    configurable: true,
+  });
+}
 
 import { createClient, SupabaseClientOptions } from '@supabase/supabase-js';
 import { env } from '../env.js';
-import ws from 'ws';
 
 const options: SupabaseClientOptions<'generic'> = {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
   },
-  realtime: {
-    // Provide ws transport for Node.js < 22 compatibility (Railway may run Node 20)
-    // @ts-ignore – Supabase expects a WebSocket constructor
-    transport: ws,
-  },
+  // Disable realtime to avoid WebSocket dependency
+  // @ts-expect-error - channels is not in the type definition but works at runtime
+  realtime: { channels: 'none' },
 };
 
 /**

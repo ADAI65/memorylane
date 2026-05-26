@@ -1,3 +1,11 @@
+// ── WebSocket polyfill for Node.js < 22 ──
+import { createRequire } from 'node:module';
+const _req = createRequire(import.meta.url);
+if (typeof globalThis.WebSocket === 'undefined') {
+  const _ws = _req('ws');
+  Object.defineProperty(globalThis, 'WebSocket', { value: _ws.WebSocket || _ws, writable: true, configurable: true });
+}
+
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { createClient } from '@supabase/supabase-js';
