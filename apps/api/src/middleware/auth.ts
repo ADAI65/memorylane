@@ -11,10 +11,20 @@ if (typeof globalThis.WebSocket === 'undefined') {
 }
 
 import { createMiddleware } from 'hono/factory';
+import { jwtVerify, errors as JoseErrors } from 'jose';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../env.js';
 import { UnauthorizedError } from '../utils/errors.js';
 import type { Profile } from '@memorylane/shared';
+
+// Cache the JWT secret as Uint8Array
+let jwtSecretBytes: Uint8Array | null = null;
+function getJwtSecret(): Uint8Array {
+  if (!jwtSecretBytes) {
+    jwtSecretBytes = new TextEncoder().encode(env.SUPABASE_JWT_SECRET);
+  }
+  return jwtSecretBytes;
+}
 
 /**
  * Middleware: Verify Supabase JWT and attach user to context
@@ -27,31 +37,41 @@ export const authMiddleware = createMiddleware(async (c, next) => {
 
   const token = authHeader.slice(7);
 
-  // Create a Supabase client with the user's JWT
-  // Use anon key so getUser() can verify the token against Supabase auth server
-  const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
-    global: {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+  // Verify JWT locally using jose (no network call needed)
+  let payload: Record<string, unknown>;
+  try {
+    const { payload: verifiedPayload } = await jwtVerify(token, getJwtSecret(), {
+      clockTolerance: 60, // 60 seconds leeway for clock skew
+    });
+    payload = verifiedPayload as Record<string, unknown>;
+  } catch (err) {
+    if (err instanceof JoseErrors.JWTExpired) {
+      throw new UnauthorizedError('Token expired');
+    }
+    if (err instanceof JoseErrors.JWSSignatureVerificationFailed) {
+      throw new UnauthorizedError('Invalid token signature');
+    }
+    throw new UnauthorizedError('Invalid or expired token');
+  }
+
+  const userId = payload.sub as string;
+  const userEmail = payload.email as string;
+
+  if (!userId) {
+    throw new UnauthorizedError('Invalid token: missing user ID');
+  }
+
+  // Get user profile from database using admin client
+  const supabaseAdmin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
     // @ts-expect-error - channels is not in the type definition but works at runtime
     realtime: { channels: 'none' },
   });
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-  if (authError || !user) {
-    throw new UnauthorizedError('Invalid or expired token');
-  }
-
-  // Get user profile
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('*')
-    .eq('id', user.id)
+    .eq('id', userId)
     .single();
 
   if (profileError || !profile) {
@@ -59,7 +79,7 @@ export const authMiddleware = createMiddleware(async (c, next) => {
   }
 
   // Attach user and profile to context
-  c.set('user', { id: user.id, email: user.email! });
+  c.set('user', { id: userId, email: userEmail || profile.email });
   c.set('profile', profile as Profile);
 
   await next();
