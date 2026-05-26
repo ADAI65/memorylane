@@ -74,6 +74,8 @@ export function useFileUpload(options: UseUploadOptions = {}) {
           });
           xhr.addEventListener('error', () => reject(new Error('Upload failed')));
           xhr.open('PUT', upload_url);
+          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.setRequestHeader('x-upsert', 'true');
           xhr.send(file);
         });
 
