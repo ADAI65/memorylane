@@ -52,10 +52,17 @@ export default function EraColorizationPage() {
         });
         xhr.addEventListener('error', () => reject(new Error('Upload failed')));
         xhr.open('PUT', upload_url);
+        xhr.setRequestHeader('Content-Type', selectedFile.type);
         xhr.send(selectedFile);
       });
 
-      // 3. Create job directly (free — no payment required)
+      // 3. Update upload status to 'ready' so job creation can verify ownership
+      const statusResult = await uploadApi.updateStatus(upload_id, 'ready');
+      if (!statusResult.success) {
+        throw new Error('Failed to update upload status');
+      }
+
+      // 4. Create job directly (free — no payment required)
       const jobResult = await jobApi.create({
         upload_id,
         service_type: ServiceType.ERA_COLORIZATION,

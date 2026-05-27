@@ -140,7 +140,13 @@ export default function UploadPage() {
         xhr.send(selectedFile);
       });
 
-      // 3. Record upload in DB
+      // 3. Update upload status to 'ready' so job creation can verify ownership
+      const statusResult = await uploadApi.updateStatus(upload_id, 'ready');
+      if (!statusResult.success) {
+        throw new Error('Failed to update upload status');
+      }
+
+      // 4. Record upload in DB (local state only)
       const uploadRecord: Upload = {
         id: upload_id,
         user_id: '',

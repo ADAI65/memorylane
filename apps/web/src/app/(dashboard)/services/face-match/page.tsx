@@ -46,8 +46,15 @@ export default function FaceMatchPage() {
       });
       xhr.addEventListener('error', () => reject(new Error(`Upload failed for ${file.name}`)));
       xhr.open('PUT', upload_url);
+      xhr.setRequestHeader('Content-Type', file.type);
       xhr.send(file);
     });
+
+    // Update upload status to 'ready' so job creation can verify ownership
+    const statusResult = await uploadApi.updateStatus(upload_id, 'ready');
+    if (!statusResult.success) {
+      throw new Error(`Failed to update upload status for ${file.name}`);
+    }
 
     return upload_id;
   };
@@ -73,7 +80,7 @@ export default function FaceMatchPage() {
       setIsUploading(false);
       setIsProcessing(true);
 
-      // 2. Create job directly (free — no payment required)
+      // 3. Create job directly (free — no payment required)
       const jobResult = await jobApi.create({
         upload_id: uploadIds[0],
         service_type: ServiceType.FACE_MATCH,

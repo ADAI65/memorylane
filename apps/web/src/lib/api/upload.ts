@@ -35,4 +35,8 @@ export const uploadApi = {
   async triggerProcessing(id: string): Promise<ApiResponse<{ job_id: string }>> {
     return apiClient.post<{ job_id: string }>(`/api/uploads/${id}/process`);
   },
+
+  async updateStatus(id: string, status: string): Promise<ApiResponse<Upload>> {
+    return apiClient.patch<Upload>(`/api/uploads/${id}/status`, { status });
+  },
 };

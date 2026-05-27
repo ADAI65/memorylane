@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './use-auth';
+import { apiClient } from '@/lib/api/client';
 
 export interface PremiumUsage {
   premium_usage_today: number;
@@ -25,13 +26,9 @@ export function usePremiumUsage() {
     }
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${baseUrl}/api/jobs/usage`, {
-        credentials: 'include',
-      });
-      const json = await res.json();
-      if (json.success) {
-        setUsage(json.data);
+      const result = await apiClient.get<PremiumUsage>('/api/jobs/usage');
+      if (result.success && result.data) {
+        setUsage(result.data);
       }
     } catch {
       // Silently fail — usage info is non-critical

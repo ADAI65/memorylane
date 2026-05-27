@@ -160,6 +160,32 @@ uploads.delete('/:id', async (c) => {
   return success(c, { message: 'Upload deleted successfully' });
 });
 
+// PATCH /api/uploads/:id/status - Update upload status
+uploads.patch('/:id/status', async (c) => {
+  const profile = c.get('profile');
+  const uploadId = c.req.param('id');
+  const { status } = await c.req.json<{ status?: string }>();
+
+  // Only allow 'ready' status transition (upload was completed to storage)
+  if (status && !['ready', 'processing', 'failed'].includes(status)) {
+    throw new ValidationError('Invalid status transition');
+  }
+
+  const { data: upload, error } = await supabaseAdmin
+    .from('uploads')
+    .update({ status: status || 'ready' })
+    .eq('id', uploadId)
+    .eq('user_id', profile.id)
+    .select()
+    .single();
+
+  if (error || !upload) {
+    throw new NotFoundError('Upload', uploadId);
+  }
+
+  return success(c, upload);
+});
+
 // POST /api/uploads/:id/process - Trigger restoration
 uploads.post('/:id/process', async (c) => {
   const profile = c.get('profile');
