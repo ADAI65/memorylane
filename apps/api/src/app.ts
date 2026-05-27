@@ -63,6 +63,9 @@ export function createApp() {
       // Allow requests with no origin (server-to-server, curl, etc.)
       if (!origin) return origin;
       if (allowedOrigins.includes(origin)) return origin;
+      // Allow any *.vercel.app subdomain for preview/branch deployments
+      // Safe because all protected routes require JWT auth
+      if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin)) return origin;
       return undefined; // Reject
     },
     credentials: true,

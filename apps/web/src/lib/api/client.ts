@@ -19,15 +19,40 @@ class ApiClient {
     // Attach Supabase JWT for backend auth (browser only)
     if (typeof window !== 'undefined') {
       try {
-        // Dynamic import to avoid SSR issues with createBrowserClient
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
+
+        // First try getSession() for the access_token
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.access_token) {
           headers['Authorization'] = `Bearer ${session.access_token}`;
+          return headers;
         }
-      } catch {
-        // No session available — request will fail with 401, which is expected for unauthenticated users
+
+        // Safari ITP / private browsing may block cookies → getSession() returns null
+        // Fall back: try getUser() to validate/reveal the session, then getSession()
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: { session: session2 } } = await supabase.auth.getSession();
+          if (session2?.access_token) {
+            headers['Authorization'] = `Bearer ${session2.access_token}`;
+            return headers;
+          }
+
+          // Final fallback: read directly from localStorage (Supabase SSR fallback storage)
+          const storageKey = `${process.env.NEXT_PUBLIC_SUPABASE_URL!.split('//')[1]}.accessToken`;
+          const storedToken = localStorage.getItem(storageKey);
+          if (storedToken) {
+            headers['Authorization'] = `Bearer ${storedToken}`;
+            return headers;
+          }
+
+          console.warn('[ApiClient] User authenticated but access token unavailable (Safari ITP?)');
+        } else {
+          console.warn('[ApiClient] getUser() returned null — user not authenticated');
+        }
+      } catch (err) {
+        console.error('[ApiClient] Auth check failed:', err);
       }
     }
 

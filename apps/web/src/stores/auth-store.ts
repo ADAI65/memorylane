@@ -61,6 +61,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         };
         set({ user: fallbackProfile, isAuthenticated: true });
       } else {
+        // No valid auth user — NOT authenticated even if we have a stale local profile
         set({ user: null, isAuthenticated: false });
       }
     } catch (error) {
